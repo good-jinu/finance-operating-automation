@@ -1,0 +1,19 @@
+/**
+ * Gmail API 접근 권한 범위
+ * 읽기 + 발송 권한으로 구성합니다.
+ */
+export const SCOPES = [
+	"https://www.googleapis.com/auth/gmail.readonly",
+	"https://www.googleapis.com/auth/gmail.send",
+];
+
+/**
+ * 자격 증명/토큰 파일 경로
+ */
+export const TOKEN_PATH = "token.json";
+export const CREDENTIALS_PATH = "credentials.json";
+
+/**
+ * 기본 검색 쿼리
+ */
+export const DEFAULT_QUERY = "is:unread";

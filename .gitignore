@@ -1,0 +1,12 @@
+# Python-generated files
+node_modules/
+build/
+dist/
+*.egg-info
+
+# ide
+.idea/
+
+# auth
+packages/core/credentials.json
+packages/core/token.json
