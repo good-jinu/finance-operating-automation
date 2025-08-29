@@ -2,7 +2,6 @@
 	"name": "@fin-ops/core",
 	"version": "1.0.0",
 	"description": "",
-	"main": "main.ts",
 	"exports": {
 		"./agent": "./src/agent/index.ts",
 		"./services": "./src/services"

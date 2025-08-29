@@ -6,7 +6,7 @@ import { GmailClient } from "./gmailClient";
 /**
  * 읽지 않은 메일 목록을 출력하고 각 메일에 자동으로 답장을 보냅니다.
  */
-export async function main() {
+export async function replyUnreadMail() {
 	try {
 		const creds = await getCredentials();
 		const service = buildGmailService(creds);
@@ -37,7 +37,11 @@ export async function main() {
 				summary.body || "",
 			);
 
-			const sent = await client.sendReply(msg, replyResult.mail_body);
+			const sent = await client.sendReply(
+				msg,
+				replyResult.mail_body,
+				replyResult.attachments,
+			);
 			console.log(`답장 메일 전송 완료. 메시지 ID: ${sent.id}`);
 			if (replyResult.attachments.length > 0) {
 				console.log(`첨부파일: ${replyResult.attachments.join(", ")}`);

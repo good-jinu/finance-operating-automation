@@ -47,7 +47,7 @@ export function getHeader(
 /**
  * Gmail API가 제공하는 base64url 인코딩 본문을 디코드하여 문자열을 반환합니다.
  */
-export function decodeBase64UrlSafe(data: string): string {
+function decodeBase64UrlSafe(data: string): string {
 	if (!data) {
 		return "";
 	}
