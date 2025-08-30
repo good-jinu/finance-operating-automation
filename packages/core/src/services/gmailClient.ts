@@ -12,6 +12,17 @@ import {
 	extractTextFromPayload,
 	getHeader,
 } from "../utils/mailParser";
+import { buildGmailService, getCredentials } from "./auth";
+
+/**
+ * Gmail 클라이언트를 생성합니다.
+ * 인증, 서비스 구축, 클라이언트 인스턴스 생성을 한 번에 처리합니다.
+ */
+export async function createGmailClient(): Promise<GmailClient> {
+	const creds = await getCredentials();
+	const service = buildGmailService(creds);
+	return new GmailClient(service);
+}
 
 export type MessageSummary = {
 	id: string | null | undefined;

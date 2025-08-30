@@ -1,17 +1,11 @@
-import {
-	buildGmailService,
-	GmailClient,
-	getCredentials,
-} from "@finance-operating-automation/core/services";
+import { createGmailClient } from "@finance-operating-automation/core/services";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
 	try {
 		const { maxResults = 100, query = "" } = await request.json();
 
-		const creds = await getCredentials();
-		const service = buildGmailService(creds);
-		const gmailClient = new GmailClient(service);
+		const gmailClient = await createGmailClient();
 		const result = await gmailClient.syncMails("me", query, maxResults);
 
 		return NextResponse.json({

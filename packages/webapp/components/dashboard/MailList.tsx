@@ -1,7 +1,6 @@
 "use client";
 
 import type { GmailMessage } from "@finance-operating-automation/core/models";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Clock, Mail, Paperclip, RefreshCw, User } from "lucide-react";
 import { useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -14,63 +13,21 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-
-interface MailListResponse {
-	success: boolean;
-	data: GmailMessage[];
-}
-
-interface SyncResponse {
-	success: boolean;
-	data: {
-		synced: number;
-		skipped: number;
-		errors: number;
-	};
-}
+import { useMails } from "@/hooks/useMails";
+import { useMailSync } from "@/hooks/useMailSync";
 
 export default function MailList() {
 	const [isUnreadOnly, setIsUnreadOnly] = useState(false);
-	const queryClient = useQueryClient();
 
 	// 메일 목록 조회
 	const {
 		data: mailsData,
 		isLoading,
 		error,
-	} = useQuery<MailListResponse>({
-		queryKey: ["mails", isUnreadOnly],
-		queryFn: async () => {
-			const response = await fetch(`/api/mails?unreadOnly=${isUnreadOnly}`);
-			if (!response.ok) {
-				throw new Error("Failed to fetch mails");
-			}
-			return response.json();
-		},
-	});
+	} = useMails(isUnreadOnly);
 
 	// 메일 동기화
-	const syncMailsMutation = useMutation<SyncResponse>({
-		mutationFn: async () => {
-			const response = await fetch("/api/mails/sync", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					maxResults: 100,
-					query: "",
-				}),
-			});
-			if (!response.ok) {
-				throw new Error("Failed to sync mails");
-			}
-			return response.json();
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["mails"] });
-		},
-	});
+	const syncMailsMutation = useMailSync();
 
 	const formatDate = (internalDate?: string) => {
 		if (!internalDate) return "";
