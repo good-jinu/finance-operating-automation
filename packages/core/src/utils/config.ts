@@ -17,3 +17,9 @@ export const CREDENTIALS_PATH = "credentials.json";
  * 기본 검색 쿼리
  */
 export const DEFAULT_QUERY = "is:unread";
+
+/**
+ * 데이터베이스 및 스토리지 파일 경로
+ */
+export const DATABASE_PATH = ".storage/database.db";
+export const FILE_PATH = ".storage/files";

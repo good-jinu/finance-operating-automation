@@ -7,7 +7,10 @@ import {
 	CheckCircle,
 	Clock,
 	Filter,
+	Mail,
 	MessageSquare,
+	Pause,
+	Play,
 	Plus,
 	Search,
 	Send,
@@ -37,6 +40,20 @@ export default function AIEmailDashboard() {
 	const [activeTab, setActiveTab] = useState("dashboard");
 	const [chatMessage, setChatMessage] = useState("");
 	const [guideline, setGuideline] = useState("");
+	const [isAutoReplyRunning, setIsAutoReplyRunning] = useState(false);
+	const [autoReplyProgress, setAutoReplyProgress] = useState(0);
+	const [processedEmails, setProcessedEmails] = useState(0);
+	const [totalUnreadEmails, setTotalUnreadEmails] = useState(0);
+	const [autoReplyLogs, setAutoReplyLogs] = useState<
+		Array<{
+			id: string;
+			subject: string;
+			sender: string;
+			status: "success" | "error" | "processing";
+			timestamp: string;
+			message?: string;
+		}>
+	>([]);
 
 	const finOpsStats = {
 		authorityChange: 23,
@@ -105,6 +122,126 @@ export default function AIEmailDashboard() {
 			active: true,
 		},
 	];
+
+	// 자동 답변 처리 함수
+	const handleAutoReply = async () => {
+		setIsAutoReplyRunning(true);
+		setAutoReplyProgress(0);
+		setProcessedEmails(0);
+
+		try {
+			// API 호출로 자동 답변 시작
+			const response = await fetch("/api/auto-reply", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.error || "자동 답변을 시작할 수 없습니다.");
+			}
+
+			const result = await response.json();
+			console.log("자동 답변 시작:", result);
+
+			// 진행 상황을 주기적으로 확인
+			const checkProgress = async () => {
+				try {
+					const statusResponse = await fetch("/api/auto-reply?action=status");
+					if (statusResponse.ok) {
+						const statusData = await statusResponse.json();
+
+						if (statusData.session && statusData.progress) {
+							const { progress } = statusData;
+							setTotalUnreadEmails(progress.totalEmails);
+							setProcessedEmails(progress.processedEmails);
+							setAutoReplyProgress(
+								(progress.processedEmails / progress.totalEmails) * 100,
+							);
+
+							if (progress.currentEmail) {
+								const emailData = {
+									id: `email-${Date.now()}`,
+									subject: progress.currentEmail.subject,
+									sender: progress.currentEmail.sender,
+									status: progress.currentEmail.status,
+									timestamp: new Date().toLocaleTimeString("ko-KR"),
+									message:
+										progress.currentEmail.status === "success"
+											? "자동 답변 전송 완료"
+											: "답변 전송 중 오류 발생",
+								};
+
+								setAutoReplyLogs((prev) => {
+									const existing = prev.find(
+										(log) =>
+											log.subject === emailData.subject &&
+											log.sender === emailData.sender,
+									);
+									if (existing) {
+										return prev.map((log) =>
+											log.subject === emailData.subject &&
+											log.sender === emailData.sender
+												? {
+														...log,
+														status: emailData.status,
+														message: emailData.message,
+													}
+												: log,
+										);
+									}
+									return [emailData, ...prev.slice(0, 9)];
+								});
+							}
+
+							if (
+								progress.status === "completed" ||
+								progress.status === "error"
+							) {
+								setIsAutoReplyRunning(false);
+								return;
+							}
+						} else {
+							setIsAutoReplyRunning(false);
+							return;
+						}
+					}
+				} catch (error) {
+					console.error("진행 상황 확인 오류:", error);
+				}
+
+				// 실행 중이면 3초 후 다시 확인
+				if (isAutoReplyRunning) {
+					setTimeout(checkProgress, 3000);
+				}
+			};
+
+			// 진행 상황 확인 시작
+			setTimeout(checkProgress, 1000);
+		} catch (error) {
+			console.error("자동 답변 처리 중 오류:", error);
+			setIsAutoReplyRunning(false);
+		}
+	};
+
+	// 자동 답변 중지 함수
+	const handleStopAutoReply = async () => {
+		try {
+			const response = await fetch("/api/auto-reply", {
+				method: "DELETE",
+			});
+
+			if (response.ok) {
+				setIsAutoReplyRunning(false);
+				setAutoReplyProgress(0);
+			}
+		} catch (error) {
+			console.error("자동 답변 중지 오류:", error);
+			setIsAutoReplyRunning(false);
+		}
+	};
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -262,6 +399,108 @@ export default function AIEmailDashboard() {
 									</CardContent>
 								</Card>
 
+								{/* AI Auto Reply Control */}
+								<Card>
+									<CardHeader>
+										<CardTitle className="flex items-center gap-2">
+											<Mail className="w-5 h-5" />
+											읽지 않은 메일 자동 답변
+										</CardTitle>
+										<CardDescription>
+											AI가 읽지 않은 메일들을 자동으로 분석하고 답변합니다
+										</CardDescription>
+									</CardHeader>
+									<CardContent className="space-y-4">
+										<div className="flex items-center justify-between">
+											<div className="flex items-center gap-4">
+												<div className="text-sm">
+													<span className="font-medium">처리 진행률: </span>
+													<span>
+														{processedEmails}/{totalUnreadEmails}
+													</span>
+												</div>
+												{isAutoReplyRunning && (
+													<div className="flex items-center gap-2">
+														<Progress
+															value={autoReplyProgress}
+															className="w-32"
+														/>
+														<span className="text-sm text-muted-foreground">
+															{Math.round(autoReplyProgress)}%
+														</span>
+													</div>
+												)}
+											</div>
+											<div className="flex items-center gap-2">
+												{!isAutoReplyRunning ? (
+													<Button onClick={handleAutoReply} className="gap-2">
+														<Play className="w-4 h-4" />
+														자동 답변 시작
+													</Button>
+												) : (
+													<Button
+														onClick={handleStopAutoReply}
+														variant="outline"
+														className="gap-2"
+													>
+														<Pause className="w-4 h-4" />
+														중지
+													</Button>
+												)}
+												<Button variant="outline" size="sm">
+													<Settings className="w-4 h-4" />
+												</Button>
+											</div>
+										</div>
+
+										{autoReplyLogs.length > 0 && (
+											<div>
+												<h4 className="text-sm font-medium mb-2">처리 로그</h4>
+												<ScrollArea className="h-32 border rounded-lg p-2">
+													<div className="space-y-2">
+														{autoReplyLogs.slice(0, 5).map((log) => (
+															<div
+																key={log.id}
+																className="flex items-center justify-between text-xs p-2 rounded bg-muted/50"
+															>
+																<div className="flex items-center gap-2">
+																	<div
+																		className={`w-2 h-2 rounded-full ${
+																			log.status === "success"
+																				? "bg-green-500"
+																				: log.status === "error"
+																					? "bg-red-500"
+																					: "bg-yellow-500"
+																		}`}
+																	/>
+																	<span className="truncate max-w-32">
+																		{log.subject}
+																	</span>
+																</div>
+																<div className="flex items-center gap-2">
+																	<span className="text-muted-foreground">
+																		{log.timestamp}
+																	</span>
+																	<Badge
+																		variant={
+																			log.status === "success"
+																				? "default"
+																				: "destructive"
+																		}
+																		className="text-xs"
+																	>
+																		{log.status === "success" ? "완료" : "오류"}
+																	</Badge>
+																</div>
+															</div>
+														))}
+													</div>
+												</ScrollArea>
+											</div>
+										)}
+									</CardContent>
+								</Card>
+
 								{/* Recent Activity */}
 								<Card>
 									<CardHeader>
@@ -332,7 +571,24 @@ export default function AIEmailDashboard() {
 									</div>
 								</div>
 
-								<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+								<div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+									<Card className="cursor-pointer hover:shadow-md transition-shadow">
+										<CardContent className="p-4">
+											<div className="flex items-center gap-3">
+												<div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+													<Bot className="w-5 h-5 text-purple-600" />
+												</div>
+												<div>
+													<p className="font-medium">자동 처리 중</p>
+													<p className="text-sm text-muted-foreground">
+														{isAutoReplyRunning
+															? `${processedEmails}/${totalUnreadEmails}`
+															: "대기"}
+													</p>
+												</div>
+											</div>
+										</CardContent>
+									</Card>
 									<Card className="cursor-pointer hover:shadow-md transition-shadow">
 										<CardContent className="p-4">
 											<div className="flex items-center gap-3">
@@ -579,6 +835,15 @@ export default function AIEmailDashboard() {
 								<div className="space-y-2">
 									<p className="text-sm font-medium">빠른 작업</p>
 									<div className="grid grid-cols-2 gap-2">
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={handleAutoReply}
+											disabled={isAutoReplyRunning}
+										>
+											<Mail className="w-3 h-3 mr-1" />
+											자동 답변
+										</Button>
 										<Button variant="outline" size="sm">
 											수권자 변경
 										</Button>
@@ -587,9 +852,6 @@ export default function AIEmailDashboard() {
 										</Button>
 										<Button variant="outline" size="sm">
 											인감 변경
-										</Button>
-										<Button variant="outline" size="sm">
-											처리 현황
 										</Button>
 									</div>
 								</div>

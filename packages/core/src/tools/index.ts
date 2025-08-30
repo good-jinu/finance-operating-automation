@@ -1,1 +1,0 @@
-export { changeGuideTool } from "./GuideManual";

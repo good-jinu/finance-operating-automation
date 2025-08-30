@@ -6,6 +6,7 @@ import {
 	extractTextFromPayload,
 	getHeader,
 } from "../utils/mailParser";
+import {FILE_PATH} from "../utils/config";
 
 export type MessageSummary = {
 	id: string | null | undefined;
@@ -133,10 +134,11 @@ export class GmailClient {
 			];
 
 			for (const filePath of attachments) {
+				const fixedFilePath = path.join(process.cwd(), FILE_PATH, filePath);
 				try {
 					const fileName = path.basename(filePath);
-					const mimeType = getMimeType(filePath);
-					const fileData = fs.readFileSync(filePath).toString("base64");
+					const mimeType = getMimeType(fixedFilePath);
+					const fileData = fs.readFileSync(fixedFilePath).toString("base64");
 
 					messageParts.push(
 						`--${boundary}`,
@@ -149,7 +151,7 @@ export class GmailClient {
 						"",
 					);
 				} catch (err) {
-					console.error(`첨부파일 읽기 오류 (${filePath}):`, err);
+					console.error(`첨부파일 읽기 오류 (${fixedFilePath}):`, err);
 				}
 			}
 

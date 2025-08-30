@@ -2,12 +2,11 @@
 	"name": "@fin-ops/core",
 	"version": "1.0.0",
 	"description": "",
+	"main": "./src/index.ts",
 	"exports": {
+		".": "./src/index.ts",
 		"./agent": "./src/agent/index.ts",
-		"./services": "./src/services"
-	},
-	"scripts": {
-		"start": "node --import=tsx main.ts"
+		"./services": "./src/services/**/*"
 	},
 	"keywords": [],
 	"author": "",
@@ -18,11 +17,13 @@
 		"@langchain/core": "^0.3.72",
 		"@langchain/langgraph": "^0.4.6",
 		"@langchain/ollama": "^0.2.3",
+		"better-sqlite3": "^12.2.0",
 		"google-auth-library": "^10.3.0",
 		"googleapis": "^157.0.0",
 		"html-to-text": "^9.0.5"
 	},
 	"devDependencies": {
+		"@types/better-sqlite3": "^7.6.13",
 		"@types/html-to-text": "^9.0.4"
 	},
 	"engines": {

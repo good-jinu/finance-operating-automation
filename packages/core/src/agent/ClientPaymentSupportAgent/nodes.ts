@@ -96,9 +96,6 @@ async function generateFinalEmail(
 ): Promise<string> {
 	const guideModel = createChatModel().withStructuredOutput(
 		EmailResponseSchema,
-		{
-			name: "email_response",
-		},
 	);
 
 	const result = await guideModel.invoke([
