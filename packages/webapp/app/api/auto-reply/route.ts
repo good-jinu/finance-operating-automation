@@ -4,7 +4,7 @@ import {
 	getSessionById,
 	type ReplyProgress,
 	replyUnreadMail,
-} from "@fin-ops/core";
+} from "@finance-operating-automation/core";
 import { type NextRequest, NextResponse } from "next/server";
 
 // 진행 상황을 저장할 메모리 저장소 (실제 프로덕션에서는 Redis 등 사용)

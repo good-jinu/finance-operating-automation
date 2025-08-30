@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    // 모노레포 내의 @fin-ops/core 패키지를 Next.js가 인식하고 처리하도록 설정합니다.
-    transpilePackages: ['@fin-ops/core'],
+    // 모노레포 내의 @finance-operating-automation/core 패키지를 Next.js가 인식하고 처리하도록 설정합니다.
+    transpilePackages: ['@finance-operating-automation/core'],
 
     webpack: (config, { isServer }) => {
         // 서버 측 빌드에서만 better-sqlite3를 외부 모듈로 처리합니다.

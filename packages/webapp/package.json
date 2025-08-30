@@ -1,5 +1,5 @@
 {
-	"name": "@fin-ops/webapp",
+	"name": "@finance-operating-automation/webapp",
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
@@ -10,7 +10,7 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
-		"@fin-ops/core": "workspace:*",
+		"@finance-operating-automation/core": "workspace:*",
 		"@radix-ui/react-avatar": "^1.1.10",
 		"@radix-ui/react-progress": "^1.1.7",
 		"@radix-ui/react-scroll-area": "^1.2.10",

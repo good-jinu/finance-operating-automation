@@ -1,5 +1,5 @@
 {
-	"name": "@fin-ops/core",
+	"name": "@finance-operating-automation/core",
 	"version": "1.0.0",
 	"description": "",
 	"main": "./src/index.ts",
