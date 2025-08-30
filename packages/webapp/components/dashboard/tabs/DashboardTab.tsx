@@ -1,4 +1,4 @@
-import { Mail, Pause, Play, Settings, TrendingUp } from "lucide-react";
+import { Mail, Pause, Play, Settings } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { AutoReplyLog, Email, FinOpsStats } from "@/types/dashboard";
-import StatsCards from "../StatsCards";
+import MailList from "../MailList";
 
 interface DashboardTabProps {
 	stats: FinOpsStats;
@@ -39,45 +39,7 @@ export default function DashboardTab({
 }: DashboardTabProps) {
 	return (
 		<div className="space-y-6">
-			<StatsCards stats={stats} />
-
-			{/* AI Activity Overview */}
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<TrendingUp className="w-5 h-5" />
-						FinOps 처리 현황
-					</CardTitle>
-					<CardDescription>
-						AI가 처리한 금융 업무들을 확인하세요
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div className="space-y-4">
-						<div className="flex items-center justify-between">
-							<span className="text-sm">서류 검증 자동화</span>
-							<div className="flex items-center gap-2">
-								<Progress value={94} className="w-20" />
-								<span className="text-sm text-muted-foreground">94%</span>
-							</div>
-						</div>
-						<div className="flex items-center justify-between">
-							<span className="text-sm">업무 분류 정확도</span>
-							<div className="flex items-center gap-2">
-								<Progress value={89} className="w-20" />
-								<span className="text-sm text-muted-foreground">89%</span>
-							</div>
-						</div>
-						<div className="flex items-center justify-between">
-							<span className="text-sm">자동 승인 처리</span>
-							<div className="flex items-center gap-2">
-								<Progress value={76} className="w-20" />
-								<span className="text-sm text-muted-foreground">76%</span>
-							</div>
-						</div>
-					</div>
-				</CardContent>
-			</Card>
+			<MailList />
 
 			{/* AI Auto Reply Control */}
 			<Card>

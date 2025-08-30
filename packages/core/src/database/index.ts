@@ -39,13 +39,22 @@ const initializeDatabase = () => {
     )
   `);
 
-	// 업무 규칙 테이블
+	// Gmail 메시지 테이블
 	db.exec(`
-    CREATE TABLE IF NOT EXISTS business_rules (
+    CREATE TABLE IF NOT EXISTS gmail_messages (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      rule_name TEXT NOT NULL,
-      rule_description TEXT NOT NULL,
-      is_active BOOLEAN DEFAULT 1,
+      message_id TEXT UNIQUE NOT NULL,
+      thread_id TEXT NOT NULL,
+      subject TEXT,
+      sender TEXT NOT NULL,
+      recipient TEXT NOT NULL,
+      body TEXT,
+      snippet TEXT,
+      labels TEXT,
+      internal_date TEXT,
+      size_estimate INTEGER,
+      is_unread BOOLEAN DEFAULT 1,
+      has_attachments BOOLEAN DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )

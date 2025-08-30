@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import type React from "react";
 import "./globals.css";
+import QueryProvider from "@/components/provider/QueryProvider";
 
 const montserrat = Montserrat({
 	subsets: ["latin"],
@@ -27,7 +28,7 @@ export default function RootLayout({
 			<body
 				className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${montserrat.variable}`}
 			>
-				{children}
+				<QueryProvider>{children}</QueryProvider>
 			</body>
 		</html>
 	);

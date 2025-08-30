@@ -19,36 +19,18 @@ export class ClientPaymentSupportAgent {
 	async processCustomerRequest(
 		message: string,
 	): Promise<{ mail_body: string; attachments: string[] }> {
-		try {
-			const result = await this.workflow.invoke({
-				messages: [new HumanMessage(message)],
-			});
+		const result = await this.workflow.invoke({
+			messages: [new HumanMessage(message)],
+		});
 
-			return {
-				mail_body: result.mail_body || this.getDefaultResponse(),
-				attachments: result.attachments || [],
-			};
-		} catch (error) {
-			console.error("고객 요청 처리 중 오류가 발생했습니다:", error);
-			return {
-				mail_body: this.getDefaultResponse(),
-				attachments: [],
-			};
+		if (!result.mail_body) {
+			throw new Error("메일 본문을 생성할 수 없습니다.");
 		}
-	}
 
-	/**
-	 * 기본 응답 메시지를 반환합니다.
-	 * @returns 기본 응답 메시지
-	 */
-	private getDefaultResponse(): string {
-		return `안녕하세요.
-
-죄송합니다. 현재 시스템 오류로 인해 요청을 정확히 처리할 수 없습니다.
-
-불편을 끼쳐드려 죄송하며, 직접 고객센터로 연락해주시면 신속히 도움을 드리겠습니다.
-
-감사합니다.`;
+		return {
+			mail_body: result.mail_body,
+			attachments: result.attachments || [],
+		};
 	}
 
 	/**
