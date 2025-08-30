@@ -1,6 +1,5 @@
 "use client";
 
-import type { GmailMessage } from "@finance-operating-automation/core/models";
 import { Clock, Mail, Paperclip, RefreshCw, User } from "lucide-react";
 import { useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
