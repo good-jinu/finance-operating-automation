@@ -1,7 +1,5 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
 import type { gmail_v1 } from "googleapis";
-import { FILE_PATH } from "../utils/config";
+import { readAttachments } from "../utils/fileReader";
 import {
 	extractEmail,
 	extractTextFromPayload,
@@ -82,38 +80,11 @@ export class GmailClient {
 
 		const to = extractEmail(fromAddress);
 
-		// 간단한 MIME 타입 결정 함수
-		function getMimeType(filePath: string): string {
-			const ext = path.extname(filePath).toLowerCase();
-			switch (ext) {
-				case ".txt":
-					return "text/plain";
-				case ".pdf":
-					return "application/pdf";
-				case ".jpg":
-				case ".jpeg":
-					return "image/jpeg";
-				case ".png":
-					return "image/png";
-				case ".gif":
-					return "image/gif";
-				case ".webp":
-					return "image/webp";
-				case ".csv":
-					return "text/csv";
-				case ".json":
-					return "application/json";
-				case ".zip":
-					return "application/zip";
-				default:
-					return "application/octet-stream";
-			}
-		}
-
 		let rawMessage: string;
 
 		if (attachments && attachments.length > 0) {
 			const boundary = `mixed_${Math.random().toString(36).slice(2)}`;
+			const attachmentInfos = readAttachments(attachments);
 
 			const messageParts: string[] = [
 				`From: ${userId}`,
@@ -133,26 +104,17 @@ export class GmailClient {
 				"",
 			];
 
-			for (const filePath of attachments) {
-				const fixedFilePath = path.join(process.cwd(), FILE_PATH, filePath);
-				try {
-					const fileName = path.basename(filePath);
-					const mimeType = getMimeType(fixedFilePath);
-					const fileData = fs.readFileSync(fixedFilePath).toString("base64");
-
-					messageParts.push(
-						`--${boundary}`,
-						`Content-Type: ${mimeType}`,
-						"MIME-Version: 1.0",
-						"Content-Transfer-Encoding: base64",
-						`Content-Disposition: attachment; filename="${fileName}"`,
-						"",
-						fileData,
-						"",
-					);
-				} catch (err) {
-					console.error(`첨부파일 읽기 오류 (${fixedFilePath}):`, err);
-				}
+			for (const attachment of attachmentInfos) {
+				messageParts.push(
+					`--${boundary}`,
+					`Content-Type: ${attachment.mimeType}`,
+					"MIME-Version: 1.0",
+					"Content-Transfer-Encoding: base64",
+					`Content-Disposition: attachment; filename="${attachment.fileName}"`,
+					"",
+					attachment.fileData,
+					"",
+				);
 			}
 
 			messageParts.push(`--${boundary}--`);
