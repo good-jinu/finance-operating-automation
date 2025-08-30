@@ -1,4 +1,8 @@
-import {buildGmailService, getCredentials, GmailClient} from "@finance-operating-automation/core/services";
+import {
+	buildGmailService,
+	GmailClient,
+	getCredentials,
+} from "@finance-operating-automation/core/services";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {

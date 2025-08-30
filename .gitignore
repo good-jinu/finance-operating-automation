@@ -8,5 +8,5 @@ dist/
 .idea/
 
 # auth
-packages/webapp/credentials.json
-packages/webapp/token.json
+credentials.json
+token.json

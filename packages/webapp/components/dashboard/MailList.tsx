@@ -14,7 +14,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MailListResponse {
 	success: boolean;
@@ -76,7 +75,7 @@ export default function MailList() {
 	const formatDate = (internalDate?: string) => {
 		if (!internalDate) return "";
 
-		const date = new Date(parseInt(internalDate));
+		const date = new Date(parseInt(internalDate, 10));
 		const now = new Date();
 		const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
 
@@ -144,8 +143,8 @@ export default function MailList() {
 						메일이 없습니다. Sync 버튼을 눌러 메일을 동기화해보세요.
 					</div>
 				) : (
-					<ScrollArea className="h-[480px]">
-						<div className="space-y-3">
+					<div className="h-[480px] overflow-y-auto">
+						<div className="my-3">
 							{mails.map((mail) => (
 								<div
 									key={mail.id}
@@ -163,10 +162,10 @@ export default function MailList() {
 											<p className="text-sm font-medium truncate">
 												{mail.sender}
 											</p>
-											{mail.is_unread && (
+											{!!mail.is_unread && (
 												<div className="w-2 h-2 bg-primary rounded-full" />
 											)}
-											{mail.has_attachments && (
+											{!!mail.has_attachments && (
 												<Paperclip className="w-3 h-3 text-muted-foreground" />
 											)}
 											<span className="text-xs text-muted-foreground ml-auto flex items-center gap-1">
@@ -194,7 +193,7 @@ export default function MailList() {
 								</div>
 							))}
 						</div>
-					</ScrollArea>
+					</div>
 				)}
 			</CardContent>
 		</Card>

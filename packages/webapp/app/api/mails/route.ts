@@ -1,11 +1,15 @@
-import {buildGmailService, getCredentials, GmailClient} from "@finance-operating-automation/core/services";
+import {
+	buildGmailService,
+	GmailClient,
+	getCredentials,
+} from "@finance-operating-automation/core/services";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
 	try {
 		const searchParams = request.nextUrl.searchParams;
-		const limit = parseInt(searchParams.get("limit") || "50");
-		const offset = parseInt(searchParams.get("offset") || "0");
+		const limit = parseInt(searchParams.get("limit") || "50", 10);
+		const offset = parseInt(searchParams.get("offset") || "0", 10);
 		const isUnreadOnly = searchParams.get("unreadOnly") === "true";
 
 		// Gmail 서비스는 실제 환경에서는 인증된 서비스로 교체해야 합니다

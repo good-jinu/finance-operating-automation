@@ -1,7 +1,9 @@
 import type { gmail_v1 } from "googleapis";
 import {
 	createGmailMessage,
-	findGmailMessageByMessageId, findRecentGmailMessages, findUnreadGmailMessages,
+	findGmailMessageByMessageId,
+	findRecentGmailMessages,
+	findUnreadGmailMessages,
 	type GmailMessage,
 } from "../models/GmailMessage";
 import { readAttachments } from "../utils/fileReader";
@@ -10,7 +12,6 @@ import {
 	extractTextFromPayload,
 	getHeader,
 } from "../utils/mailParser";
-import {buildGmailService, getCredentials} from "./auth";
 
 export type MessageSummary = {
 	id: string | null | undefined;

@@ -27,7 +27,6 @@ interface DashboardTabProps {
 }
 
 export default function DashboardTab({
-	stats,
 	recentEmails,
 	isAutoReplyRunning,
 	autoReplyProgress,

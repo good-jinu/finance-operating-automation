@@ -3,7 +3,6 @@ import { authenticate } from "@google-cloud/local-auth";
 import type { OAuth2Client } from "google-auth-library";
 import { type gmail_v1, google } from "googleapis";
 import { CREDENTIALS_PATH, SCOPES, TOKEN_PATH } from "../utils/config";
-import { join }	from "node:path";
 
 // biome-ignore lint:suspicious/noExplicitAny
 async function loadToken(): Promise<any | null> {
@@ -36,14 +35,10 @@ export async function getCredentials(): Promise<OAuth2Client> {
 		return oAuth2Client;
 	}
 
-	console.log("oAuth2Client", oAuth2Client);
-
 	const newClient = await authenticate({
 		scopes: SCOPES,
 		keyfilePath: CREDENTIALS_PATH,
 	});
-
-	console.log("newClient", newClient);
 
 	if (newClient.credentials) {
 		oAuth2Client.setCredentials(newClient.credentials);
