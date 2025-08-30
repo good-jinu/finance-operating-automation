@@ -1,12 +1,12 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import type { gmail_v1 } from "googleapis";
+import { FILE_PATH } from "../utils/config";
 import {
 	extractEmail,
 	extractTextFromPayload,
 	getHeader,
 } from "../utils/mailParser";
-import {FILE_PATH} from "../utils/config";
 
 export type MessageSummary = {
 	id: string | null | undefined;

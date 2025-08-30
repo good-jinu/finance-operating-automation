@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import Database from "better-sqlite3";
-import {DATABASE_PATH} from "../utils/config";
+import { DATABASE_PATH } from "../utils/config";
 
 const dbPath = join(process.cwd(), DATABASE_PATH);
 const db = new Database(dbPath);
