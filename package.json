@@ -3,9 +3,11 @@
 	"version": "1.0.0",
 	"description": "",
 	"scripts": {
+		"postinstall": "cd packages/core && npm rebuild better-sqlite3",
 		"dev": "pnpm --filter @finance-operating-automation/webapp dev",
 		"build": "pnpm --filter @finance-operating-automation/webapp build",
 		"start": "pnpm --filter @finance-operating-automation/webapp start",
+		"build-and-start": "pnpm build && pnpm start",
 		"check": "biome check --write"
 	},
 	"keywords": [],
