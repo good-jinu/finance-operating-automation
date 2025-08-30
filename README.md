@@ -1,8 +1,8 @@
-# FinOps - 금융 운영 자동화 시스템
+# Finance Operating Automation
 
 ## 개요
 
-FinOps는 금융기관의 고객 지원 업무를 자동화하는 AI 기반 시스템입니다. Gmail API를 활용하여 읽지 않은 메일을 자동으로 처리하고, LangChain과 ReAct 에이전트를 통해 고객 문의에 적절한 답변을 자동으로 생성합니다.
+금융기관의 고객 지원 업무를 자동화하는 AI 기반 시스템입니다. Gmail API를 활용하여 읽지 않은 메일을 자동으로 처리하고, LangChain과 ReAct 에이전트를 통해 고객 문의에 적절한 답변을 자동으로 생성합니다.
 
 ## 주요 기능
 
