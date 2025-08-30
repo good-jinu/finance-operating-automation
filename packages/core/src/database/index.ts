@@ -24,20 +24,6 @@ const initializeDatabase = () => {
     )
   `);
 
-	// 자동 답변 세션 테이블
-	db.exec(`
-    CREATE TABLE IF NOT EXISTS auto_reply_sessions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      session_id TEXT UNIQUE NOT NULL,
-      status TEXT NOT NULL CHECK(status IN ('running', 'completed', 'stopped', 'error')),
-      total_emails INTEGER DEFAULT 0,
-      processed_emails INTEGER DEFAULT 0,
-      success_count INTEGER DEFAULT 0,
-      error_count INTEGER DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
 
 	// Gmail 메시지 테이블
 	db.exec(`

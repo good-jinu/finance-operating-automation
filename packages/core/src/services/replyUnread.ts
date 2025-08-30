@@ -1,13 +1,5 @@
 import { ClientPaymentSupportAgent } from "../agent";
 import {
-	type AutoReplySession,
-	createAutoReplySession,
-	findActiveAutoReplySession,
-	findAutoReplySessionBySessionId,
-	updateAutoReplySessionProgress,
-	updateAutoReplySessionStatus,
-} from "../models/AutoReplySession";
-import {
 	createEmailLog,
 	findEmailLogByEmailId,
 	findRecentEmailLogs,
@@ -18,12 +10,11 @@ import { buildGmailService, getCredentials } from "./auth";
 import { GmailClient } from "./gmailClient";
 
 export interface ReplyProgress {
-	sessionId: string;
 	totalEmails: number;
 	processedEmails: number;
 	successCount: number;
 	errorCount: number;
-	status: "running" | "completed" | "stopped" | "error";
+	status: "running" | "completed" | "error";
 	currentEmail?: {
 		subject: string;
 		sender: string;
@@ -38,9 +29,6 @@ export interface ReplyProgress {
 export async function replyUnreadMail(
 	progressCallback?: (progress: ReplyProgress) => void,
 ) {
-	const sessionId = `session_${Date.now()}`;
-	let session: AutoReplySession | null = null;
-
 	try {
 		const creds = await getCredentials();
 		const service = buildGmailService(creds);
@@ -52,7 +40,6 @@ export async function replyUnreadMail(
 		if (!messages || messages.length === 0) {
 			console.log("읽지 않은 메일이 없습니다.");
 			return {
-				sessionId,
 				totalEmails: 0,
 				processedEmails: 0,
 				successCount: 0,
@@ -60,16 +47,6 @@ export async function replyUnreadMail(
 				status: "completed" as const,
 			};
 		}
-
-		// 세션 생성
-		session = createAutoReplySession({
-			session_id: sessionId,
-			status: "running",
-			total_emails: messages.length,
-			processed_emails: 0,
-			success_count: 0,
-			error_count: 0,
-		});
 
 		let successCount = 0;
 		let errorCount = 0;
@@ -101,7 +78,6 @@ export async function replyUnreadMail(
 
 				// 진행 상황 업데이트
 				const progress: ReplyProgress = {
-					sessionId,
 					totalEmails: messages.length,
 					processedEmails: i,
 					successCount,
@@ -169,7 +145,6 @@ export async function replyUnreadMail(
 				errorCount++;
 
 				const progress: ReplyProgress = {
-					sessionId,
 					totalEmails: messages.length,
 					processedEmails: i + 1,
 					successCount,
@@ -186,21 +161,9 @@ export async function replyUnreadMail(
 					progressCallback(progress);
 				}
 			}
-
-			// 세션 진행 상황 업데이트
-			updateAutoReplySessionProgress(
-				sessionId,
-				i + 1,
-				successCount,
-				errorCount,
-			);
 		}
 
-		// 세션 완료
-		updateAutoReplySessionStatus(sessionId, "completed");
-
 		const finalProgress: ReplyProgress = {
-			sessionId,
 			totalEmails: messages.length,
 			processedEmails: messages.length,
 			successCount,
@@ -220,12 +183,7 @@ export async function replyUnreadMail(
 	} catch (error) {
 		console.error(`전체 처리 중 오류:`, error);
 
-		if (session) {
-			updateAutoReplySessionStatus(sessionId, "error");
-		}
-
 		const errorProgress: ReplyProgress = {
-			sessionId,
 			totalEmails: 0,
 			processedEmails: 0,
 			successCount: 0,
@@ -239,20 +197,6 @@ export async function replyUnreadMail(
 
 		throw error;
 	}
-}
-
-/**
- * 활성 자동 답변 세션 정보를 가져옵니다.
- */
-export function getActiveSession() {
-	return findActiveAutoReplySession();
-}
-
-/**
- * 세션 ID로 세션 정보를 가져옵니다.
- */
-export function getSessionById(sessionId: string) {
-	return findAutoReplySessionBySessionId(sessionId);
 }
 
 /**

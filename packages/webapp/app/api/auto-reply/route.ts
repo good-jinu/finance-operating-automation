@@ -1,48 +1,44 @@
 import {
-	getActiveSession,
 	getRecentEmailLogs,
-	getSessionById,
 	type ReplyProgress,
 	replyUnreadMail,
 } from "@finance-operating-automation/core";
 import { type NextRequest, NextResponse } from "next/server";
 
-// 진행 상황을 저장할 메모리 저장소 (실제 프로덕션에서는 Redis 등 사용)
-const progressStore = new Map<string, ReplyProgress>();
+// 현재 실행 중인 상태를 저장
+let isRunning = false;
 
 export async function POST() {
 	try {
-		// 이미 실행 중인 세션이 있는지 확인
-		const activeSession = getActiveSession();
-		if (activeSession) {
+		// 이미 실행 중인지 확인
+		if (isRunning) {
 			return NextResponse.json(
 				{
 					error: "이미 자동 답변이 실행 중입니다.",
-					sessionId: activeSession.session_id,
 				},
 				{ status: 409 },
 			);
 		}
 
-		// 자동 답변 시작
-		const progressCallback = (progress: ReplyProgress) => {
-			progressStore.set(progress.sessionId, progress);
-		};
+		isRunning = true;
 
 		// 비동기로 실행
-		replyUnreadMail(progressCallback)
+		replyUnreadMail()
 			.then((result) => {
 				console.log("자동 답변 완료:", result);
 			})
 			.catch((error) => {
 				console.error("자동 답변 오류:", error);
+			})
+			.finally(() => {
+				isRunning = false;
 			});
 
 		return NextResponse.json({
 			message: "자동 답변이 시작되었습니다.",
-			sessionId: `session_${Date.now()}`,
 		});
 	} catch (error) {
+		isRunning = false;
 		console.error("자동 답변 시작 오류:", error);
 		return NextResponse.json(
 			{
@@ -56,42 +52,20 @@ export async function POST() {
 
 export async function GET(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams;
-	const sessionId = searchParams.get("sessionId");
 	const action = searchParams.get("action");
 
 	try {
 		if (action === "status") {
-			// 활성 세션 상태 확인
-			const activeSession = getActiveSession();
-			if (activeSession) {
-				const progress = progressStore.get(activeSession.session_id);
-				return NextResponse.json({
-					session: activeSession,
-					progress: progress || null,
-				});
-			} else {
-				return NextResponse.json({
-					session: null,
-					progress: null,
-				});
-			}
+			// 실행 상태만 반환
+			return NextResponse.json({
+				isRunning,
+			});
 		}
 
 		if (action === "logs") {
 			// 최근 이메일 로그 가져오기
 			const logs = getRecentEmailLogs(20);
 			return NextResponse.json({ logs });
-		}
-
-		if (sessionId) {
-			// 특정 세션 정보 가져오기
-			const session = getSessionById(sessionId);
-			const progress = progressStore.get(sessionId);
-
-			return NextResponse.json({
-				session,
-				progress: progress || null,
-			});
 		}
 
 		return NextResponse.json(
@@ -101,10 +75,10 @@ export async function GET(request: NextRequest) {
 			{ status: 400 },
 		);
 	} catch (error) {
-		console.error("세션 정보 조회 오류:", error);
+		console.error("상태 정보 조회 오류:", error);
 		return NextResponse.json(
 			{
-				error: "세션 정보를 조회할 수 없습니다.",
+				error: "상태 정보를 조회할 수 없습니다.",
 				details: error instanceof Error ? error.message : String(error),
 			},
 			{ status: 500 },
@@ -114,23 +88,20 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE() {
 	try {
-		// 활성 세션 중지 (실제로는 더 복잡한 로직 필요)
-		const activeSession = getActiveSession();
-		if (!activeSession) {
+		if (!isRunning) {
 			return NextResponse.json(
 				{
-					error: "실행 중인 세션이 없습니다.",
+					error: "실행 중인 프로세스가 없습니다.",
 				},
 				{ status: 404 },
 			);
 		}
 
-		// 세션 상태를 stopped로 변경
-		// 실제 구현에서는 진행 중인 프로세스를 안전하게 중지해야 함
+		// 단순히 상태만 변경 (실제 중지 로직은 더 복잡할 수 있음)
+		isRunning = false;
 
 		return NextResponse.json({
 			message: "자동 답변이 중지되었습니다.",
-			sessionId: activeSession.session_id,
 		});
 	} catch (error) {
 		console.error("자동 답변 중지 오류:", error);

@@ -20,22 +20,23 @@ import type { AutoReplyLog } from "@/types/dashboard";
 
 interface MailAndAutoReplySectionProps {
 	isAutoReplyRunning: boolean;
-	autoReplyProgress: number;
-	processedEmails: number;
-	totalUnreadEmails: number;
 	autoReplyLogs: AutoReplyLog[];
 	onStartAutoReply: () => void;
 	onStopAutoReply: () => void;
+	isPending?: boolean;
+	isSuccess?: boolean;
+	isError?: boolean;
+	error?: Error | null;
 }
 
 export default function MailAndAutoReplySection({
 	isAutoReplyRunning,
-	autoReplyProgress,
-	processedEmails,
-	totalUnreadEmails,
 	autoReplyLogs,
 	onStartAutoReply,
 	onStopAutoReply,
+	isPending = false,
+	isSuccess = false,
+	isError = false,
 }: MailAndAutoReplySectionProps) {
 	const [isUnreadOnly, setIsUnreadOnly] = useState(false);
 
@@ -112,25 +113,43 @@ export default function MailAndAutoReplySection({
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-4">
 							<div className="text-sm">
-								<span className="font-medium">처리 진행률: </span>
-								<span>
-									{processedEmails}/{totalUnreadEmails}
-								</span>
+								<span className="font-medium">자동 답변 상태: </span>
+								<Badge 
+									variant={
+										isAutoReplyRunning 
+											? "default" 
+											: isPending 
+											? "secondary"
+											: isError 
+											? "destructive"
+											: isSuccess
+											? "outline"
+											: "secondary"
+									}
+								>
+									{isPending ? "시작 중..." : isAutoReplyRunning ? "실행 중" : isError ? "오류" : isSuccess ? "완료" : "대기"}
+								</Badge>
 							</div>
-							{isAutoReplyRunning && (
-								<div className="flex items-center gap-2">
-									<Progress value={autoReplyProgress} className="w-32" />
-									<span className="text-sm text-muted-foreground">
-										{Math.round(autoReplyProgress)}%
-									</span>
+							{isError && error && (
+								<div className="text-sm text-destructive">
+									{error.message}
 								</div>
 							)}
 						</div>
 						<div className="flex items-center gap-2">
 							{!isAutoReplyRunning ? (
-								<Button onClick={onStartAutoReply} className="gap-2" size="sm">
-									<Play className="w-4 h-4" />
-									자동 답변 시작
+								<Button 
+									onClick={onStartAutoReply} 
+									className="gap-2" 
+									size="sm"
+									disabled={isPending}
+								>
+									{isPending ? (
+										<RefreshCw className="w-4 h-4 animate-spin" />
+									) : (
+										<Play className="w-4 h-4" />
+									)}
+									{isPending ? "시작 중..." : "자동 답변 시작"}
 								</Button>
 							) : (
 								<Button
@@ -138,6 +157,7 @@ export default function MailAndAutoReplySection({
 									variant="outline"
 									className="gap-2"
 									size="sm"
+									disabled={isPending}
 								>
 									<Pause className="w-4 h-4" />
 									중지

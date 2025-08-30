@@ -25,9 +25,6 @@ export default function AIEmailDashboard() {
 
 	const {
 		isAutoReplyRunning,
-		autoReplyProgress,
-		processedEmails,
-		totalUnreadEmails,
 		autoReplyLogs,
 		handleAutoReply,
 		handleStopAutoReply,
@@ -58,9 +55,6 @@ export default function AIEmailDashboard() {
 									stats={finOpsStats}
 									recentEmails={recentEmails}
 									isAutoReplyRunning={isAutoReplyRunning}
-									autoReplyProgress={autoReplyProgress}
-									processedEmails={processedEmails}
-									totalUnreadEmails={totalUnreadEmails}
 									autoReplyLogs={autoReplyLogs}
 									onStartAutoReply={handleAutoReply}
 									onStopAutoReply={handleStopAutoReply}
@@ -71,8 +65,8 @@ export default function AIEmailDashboard() {
 								<InboxTab
 									recentEmails={recentEmails}
 									isAutoReplyRunning={isAutoReplyRunning}
-									processedEmails={processedEmails}
-									totalUnreadEmails={totalUnreadEmails}
+									processedEmails={1}
+									totalUnreadEmails={13}
 								/>
 							</TabsContent>
 
