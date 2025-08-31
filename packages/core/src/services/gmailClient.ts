@@ -16,6 +16,21 @@ import {
 import { buildGmailService, getCredentials } from "./auth";
 
 /**
+ * Subject를 RFC 2047 형식으로 인코딩합니다.
+ * 한글이나 기타 비ASCII 문자가 포함된 제목이 깨지지 않도록 처리합니다.
+ */
+function encodeSubject(subject: string): string {
+	// ASCII 문자만 있는 경우 인코딩하지 않음
+	if (/^[\x20-\x7E]*$/.test(subject)) {
+		return subject;
+	}
+
+	// UTF-8로 인코딩하고 Base64로 변환 후 RFC 2047 형식으로 래핑
+	const encodedSubject = `=?UTF-8?B?${Buffer.from(subject, 'utf-8').toString('base64')}?=`;
+	return encodedSubject;
+}
+
+/**
  * Gmail 클라이언트를 생성합니다.
  * 인증, 서비스 구축, 클라이언트 인스턴스 생성을 한 번에 처리합니다.
  */
@@ -97,6 +112,9 @@ export class GmailClient {
 			? subject
 			: `Re: ${subject}`;
 
+		// Subject를 RFC 2047 형식으로 인코딩
+		const encodedReplySubject = encodeSubject(replySubject);
+
 		const to = extractEmail(fromAddress);
 
 		let rawMessage: string;
@@ -108,7 +126,7 @@ export class GmailClient {
 			const messageParts: string[] = [
 				`From: ${userId}`,
 				`To: ${to}`,
-				`Subject: ${replySubject}`,
+				`Subject: ${encodedReplySubject}`,
 				`In-Reply-To: ${originalMessageId}`,
 				`References: ${originalMessageId}`,
 				"MIME-Version: 1.0",
@@ -142,9 +160,11 @@ export class GmailClient {
 			rawMessage = [
 				`From: ${userId}`,
 				`To: ${to}`,
-				`Subject: ${replySubject}`,
+				`Subject: ${encodedReplySubject}`,
 				`In-Reply-To: ${originalMessageId}`,
 				`References: ${originalMessageId}`,
+				'Content-Type: text/plain; charset="UTF-8"',
+				"MIME-Version: 1.0",
 				"",
 				replyBody,
 			].join("\n");
