@@ -72,8 +72,8 @@ export function useAutoReply() {
 
 	const isAutoReplyRunning = statusData?.isRunning || false;
 	const autoReplyLogs: AutoReplyLog[] =
-		logsData?.map((log: EmailLog) => ({
-			id: log.id?.toString(),
+		logsData?.map((log: EmailLog, index: number) => ({
+			id: log.id?.toString() ?? `no-id-${index}`,
 			subject: log.subject,
 			sender: log.sender,
 			status: log.status === "success" ? "success" : "error",
