@@ -25,7 +25,7 @@ export default function GuidelinesTab({
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
-				<h2 className="text-2xl font-bold">FinOps 업무 규칙 설정</h2>
+				<h2 className="text-2xl font-bold">업무 규칙 설정</h2>
 				<Button>
 					<Plus className="w-4 h-4 mr-2" />새 규칙 추가
 				</Button>
@@ -52,7 +52,7 @@ export default function GuidelinesTab({
 			<Card>
 				<CardHeader>
 					<CardTitle>활성 업무 규칙</CardTitle>
-					<CardDescription>현재 적용 중인 FinOps 처리 규칙들</CardDescription>
+					<CardDescription>현재 적용 중인 업무 처리 규칙들</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-3">

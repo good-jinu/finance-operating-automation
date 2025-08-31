@@ -28,7 +28,7 @@ export default function AIChatSidebar({
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
 					<Bot className="w-5 h-5" />
-					FinOps AI 어시스턴트
+					AI 어시스턴트
 				</CardTitle>
 				<CardDescription>금융 업무 처리를 도와드립니다</CardDescription>
 			</CardHeader>

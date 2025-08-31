@@ -12,7 +12,7 @@ export default function Header() {
 							<Bot className="w-5 h-5 text-primary-foreground" />
 						</div>
 						<h1 className="text-2xl font-bold text-foreground">
-							FinOps - 금융 운영 자동화
+							금융 운영 자동화
 						</h1>
 					</div>
 					<div className="flex items-center gap-2">

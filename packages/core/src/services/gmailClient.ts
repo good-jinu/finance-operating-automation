@@ -6,6 +6,7 @@ import {
 	findUnreadGmailMessages,
 	type GmailMessage,
 	updateGmailMessageLabelsAndReadStatus,
+	updateGmailMessageReadStatus,
 } from "../models/GmailMessage";
 import { readAttachments } from "../utils/fileReader";
 import {
@@ -291,6 +292,49 @@ export class GmailClient {
 		}
 
 		return findRecentGmailMessages(limit);
+	}
+
+	/**
+	 * 특정 이메일에서 UNREAD 라벨을 제거하여 읽음으로 표시합니다.
+	 */
+	async markEmailAsRead(
+		messageId: string,
+		userId: string = "me",
+	): Promise<gmail_v1.Schema$Message> {
+		try {
+			const response = await this.service.users.messages.modify({
+				userId,
+				id: messageId,
+				requestBody: {
+					removeLabelIds: ["UNREAD"],
+				},
+			});
+
+			// Gmail API 호출 성공 시 DB도 업데이트
+			try {
+				const updatedLabels = JSON.stringify(response.data.labelIds || []);
+				const updateSuccess = updateGmailMessageLabelsAndReadStatus(
+					messageId,
+					updatedLabels,
+					false, // is_unread = false (읽음)
+				);
+
+				if (updateSuccess) {
+					console.log(`DB 업데이트 성공: ${messageId} - 읽음으로 표시됨`);
+				} else {
+					console.warn(`DB 업데이트 실패: ${messageId} - 메시지가 DB에 존재하지 않을 수 있습니다`);
+				}
+			} catch (dbError) {
+				console.error(`DB 업데이트 중 오류 발생 (${messageId}):`, dbError);
+				// DB 업데이트 실패는 Gmail API 성공을 방해하지 않음
+			}
+
+			console.log(`이메일이 읽음으로 처리되었습니다: ${messageId}`);
+			return response.data;
+		} catch (error) {
+			console.error(`이메일을 읽음으로 처리하는 중 오류 발생 (${messageId}):`, error);
+			throw error;
+		}
 	}
 
 	/**

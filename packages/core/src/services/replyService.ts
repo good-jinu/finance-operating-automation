@@ -52,6 +52,16 @@ export async function generateRepliesForMails(
 
 		console.log(`메일 ${messages.length}개에 대한 답변 생성 시작`);
 
+		// Gmail 클라이언트 초기화 (읽음 표시를 위해)
+		let gmailClient: GmailClient | null = null;
+		try {
+			const creds = await getCredentials();
+			const service = buildGmailService(creds);
+			gmailClient = new GmailClient(service);
+		} catch (error) {
+			console.warn("Gmail 클라이언트 초기화 실패 - 읽음 표시 기능을 사용할 수 없습니다:", error);
+		}
+
 		for (let i = 0; i < messages.length; i++) {
 			const message = messages[i];
 
@@ -75,6 +85,17 @@ export async function generateRepliesForMails(
 						attachments: JSON.stringify(replyResult.attachments),
 						is_sent: false,
 					});
+				}
+
+				// 답변 생성 성공 시 해당 메일을 읽음으로 표시
+				if (gmailClient && message.message_id) {
+					try {
+						await gmailClient.markEmailAsRead(message.message_id);
+						console.log(`메일 읽음 표시 완료: ${message.message_id}`);
+					} catch (markReadError) {
+						console.warn(`메일 읽음 표시 실패 (${message.message_id}):`, markReadError);
+						// 읽음 표시 실패는 전체 프로세스를 중단하지 않음
+					}
 				}
 
 				successCount++;
@@ -110,142 +131,6 @@ export async function generateRepliesForMails(
 			processedEmails: 0,
 			successCount: 0,
 			errorCount: mailIds.length,
-			status: "error",
-		};
-
-		if (progressCallback) {
-			progressCallback(errorProgress);
-		}
-
-		throw error;
-	}
-}
-
-/**
- * DB에서 읽지 않은 메일에 대한 답변을 생성하여 reply_mails 테이블에 저장
- */
-export async function generateRepliesForUnreadMails(
-	progressCallback?: (progress: GenerateRepliesProgress) => void,
-) {
-	try {
-		const writer = new ClientPaymentSupportAgent();
-		const unreadMessages = findUnreadGmailMessages(50); // 최대 50개
-
-		if (!unreadMessages || unreadMessages.length === 0) {
-			console.log("읽지 않은 메일이 없습니다.");
-			return {
-				totalEmails: 0,
-				processedEmails: 0,
-				successCount: 0,
-				errorCount: 0,
-				status: "completed" as const,
-			};
-		}
-
-		let successCount = 0;
-		let errorCount = 0;
-
-		console.log(
-			`읽지 않은 메일 ${unreadMessages.length}개에 대한 답변 생성 시작`,
-		);
-
-		for (let i = 0; i < unreadMessages.length; i++) {
-			const message = unreadMessages[i];
-
-			try {
-				// 진행 상황 업데이트
-				const progress: GenerateRepliesProgress = {
-					totalEmails: unreadMessages.length,
-					processedEmails: i,
-					successCount,
-					errorCount,
-					status: "running",
-					currentEmail: {
-						subject: message.subject || "No Subject",
-						sender: message.sender,
-						status: "processing",
-					},
-				};
-
-				if (progressCallback) {
-					progressCallback(progress);
-				}
-
-				console.log(
-					`답변 생성 중: ${message.subject || ""} (${i + 1}/${unreadMessages.length})`,
-				);
-
-				// AI가 답장 본문 작성
-				const replyResult = await writer.generateReply(
-					message.subject || "",
-					message.body || message.snippet || "",
-				);
-
-				// reply_mails 테이블에 답변 저장 (전송하지 않은 상태로)
-				if (message.id) {
-					createReplyMail({
-						original_message_id: message.id,
-						subject: `Re: ${message.subject || "No Subject"}`,
-						reply_body: replyResult.mail_body,
-						attachments: JSON.stringify(replyResult.attachments),
-						is_sent: false,
-					});
-				}
-
-				successCount++;
-				console.log(`답변 생성 완료: ${message.subject}`);
-
-				if (progress.currentEmail) {
-					progress.currentEmail.status = "success";
-				}
-			} catch (error) {
-				console.error(`메일 답변 생성 중 오류 (${message.id}):`, error);
-				errorCount++;
-
-				const progress: GenerateRepliesProgress = {
-					totalEmails: unreadMessages.length,
-					processedEmails: i + 1,
-					successCount,
-					errorCount,
-					status: "running",
-					currentEmail: {
-						subject: "Error processing email",
-						sender: "Unknown",
-						status: "error",
-					},
-				};
-
-				if (progressCallback) {
-					progressCallback(progress);
-				}
-			}
-		}
-
-		const finalProgress: GenerateRepliesProgress = {
-			totalEmails: unreadMessages.length,
-			processedEmails: unreadMessages.length,
-			successCount,
-			errorCount,
-			status: "completed",
-		};
-
-		if (progressCallback) {
-			progressCallback(finalProgress);
-		}
-
-		console.log(
-			`답변 생성 완료: 총 ${unreadMessages.length}개, 성공 ${successCount}개, 실패 ${errorCount}개`,
-		);
-
-		return finalProgress;
-	} catch (error) {
-		console.error(`답변 생성 중 전체 오류:`, error);
-
-		const errorProgress: GenerateRepliesProgress = {
-			totalEmails: 0,
-			processedEmails: 0,
-			successCount: 0,
-			errorCount: 1,
 			status: "error",
 		};
 

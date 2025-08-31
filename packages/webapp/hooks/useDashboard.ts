@@ -40,7 +40,7 @@ export function useDashboard() {
 		},
 		{
 			id: 3,
-			sender: "AI FinOps 어시스턴트",
+			sender: "AI 어시스턴트",
 			subject: "자동 처리: 인감 변경 승인 완료",
 			preview:
 				"GHI corporation 인감 변경 신청이 가이드라인에 따라 자동 승인되었습니다.",
