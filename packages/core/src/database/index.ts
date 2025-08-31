@@ -49,7 +49,7 @@ const initializeDatabase = () => {
 	db.exec(`
     CREATE TABLE IF NOT EXISTS reply_mails (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      original_message_id INTEGER NOT NULL,
+      original_message_id TEXT NOT NULL,
       subject TEXT NOT NULL,
       reply_body TEXT NOT NULL,
       attachments TEXT,
@@ -57,7 +57,7 @@ const initializeDatabase = () => {
       sent_at DATETIME,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (original_message_id) REFERENCES gmail_messages (id)
+      FOREIGN KEY (original_message_id) REFERENCES gmail_messages (message_id) ON DELETE CASCADE
     )
   `);
 };

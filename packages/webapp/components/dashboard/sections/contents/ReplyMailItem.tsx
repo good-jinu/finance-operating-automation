@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useSendReplyMail } from "@/hooks/useReplyMails";
+import { useDownloadStaticAttachment } from "@/hooks/useStaticAttachments";
+import { parseAttachments } from "@/lib/attachmentUtils";
 
 interface ReplyMailItemProps {
 	replyMail: ReplyMailWithOriginal;
@@ -13,6 +15,21 @@ interface ReplyMailItemProps {
 
 export function ReplyMailItem({ replyMail }: ReplyMailItemProps) {
 	const sendReplyMailMutation = useSendReplyMail();
+	const downloadAttachmentMutation = useDownloadStaticAttachment();
+
+	const attachments = replyMail.attachments
+		? parseAttachments(replyMail.attachments)
+		: [];
+
+	const handleDownloadAttachment = (attachment: string) => {
+		if (!attachment) {
+			return;
+		}
+
+		downloadAttachmentMutation.mutate({
+			filename: attachment,
+		});
+	};
 
 	return (
 		<div
@@ -33,10 +50,9 @@ export function ReplyMailItem({ replyMail }: ReplyMailItemProps) {
 						<p className="text-sm font-medium truncate">
 							답장: {replyMail.original_sender}
 						</p>
-						{replyMail.attachments &&
-							JSON.parse(replyMail.attachments).length > 0 && (
-								<Paperclip className="w-3 h-3 text-muted-foreground" />
-							)}
+						{attachments.length > 0 && (
+							<Paperclip className="w-3 h-3 text-muted-foreground" />
+						)}
 						<Badge
 							variant={replyMail.is_sent ? "default" : "secondary"}
 							className="text-xs"
@@ -56,38 +72,31 @@ export function ReplyMailItem({ replyMail }: ReplyMailItemProps) {
 					<p className="text-xs text-muted-foreground line-clamp-3 mb-3 p-2 bg-muted/30 rounded">
 						{replyMail.reply_body}
 					</p>
-					{replyMail.attachments &&
-						JSON.parse(replyMail.attachments).length > 0 && (
-							<div className="mb-3">
-								<div className="flex items-center gap-2 mb-2">
-									<Paperclip className="w-3 h-3 text-muted-foreground" />
-									<span className="text-xs font-medium text-muted-foreground">
-										첨부파일 ({JSON.parse(replyMail.attachments).length}
-										개)
-									</span>
-								</div>
-								<div className="flex flex-wrap gap-1">
-									{JSON.parse(replyMail.attachments).map(
-										// biome-ignore lint:suspicious/noExplicitAny
-										(attachment: any, index: number) => (
-											<Badge
-												key={attachment.filename}
-												variant="outline"
-												className="text-xs px-2 py-1"
-											>
-												{attachment.filename || `첨부파일 ${index + 1}`}
-												{attachment.size && (
-													<span className="ml-1 text-muted-foreground">
-														({Math.round(attachment.size / 1024)}
-														KB)
-													</span>
-												)}
-											</Badge>
-										),
-									)}
-								</div>
+					{attachments.length > 0 && (
+						<div className="mb-3">
+							<div className="flex items-center gap-2 mb-2">
+								<Paperclip className="w-3 h-3 text-muted-foreground" />
+								<span className="text-xs font-medium text-muted-foreground">
+									첨부파일 ({attachments.length}개)
+								</span>
 							</div>
-						)}
+							<div className="flex flex-wrap gap-1">
+								{attachments.map(
+									(attachment: string, index: number) => (
+										<Badge
+											key={attachment || index}
+											variant="outline"
+											className="text-xs px-2 py-1 cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
+											onClick={() => handleDownloadAttachment(attachment)}
+											title={`${attachment || `첨부파일 ${index + 1}`} 다운로드`}
+										>
+											{attachment || `첨부파일 ${index + 1}`}
+										</Badge>
+									),
+								)}
+							</div>
+						</div>
+					)}
 					<div className="flex items-center gap-2">
 						{!replyMail.is_sent && (
 							<Button

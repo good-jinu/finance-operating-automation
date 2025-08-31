@@ -79,7 +79,7 @@ export async function generateRepliesForMails(
 				// reply_mails 테이블에 답변 저장 (전송하지 않은 상태로)
 				if (message.id) {
 					createReplyMail({
-						original_message_id: message.id,
+						original_message_id: message.message_id,
 						subject: `Re: ${message.subject || "No Subject"}`,
 						reply_body: replyResult.mail_body,
 						attachments: JSON.stringify(replyResult.attachments),
@@ -239,7 +239,7 @@ export function getReplyMailById(id: number) {
  * DB의 gmail_messages에서 Gmail API message_id 가져오기
  */
 async function getOriginalGmailMessageId(
-	dbMessageId: number,
+	dbMessageId: string,
 ): Promise<string | null> {
 	const db = require("../database").default;
 	const stmt = db.prepare("SELECT message_id FROM gmail_messages WHERE id = ?");

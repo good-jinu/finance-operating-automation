@@ -15,16 +15,6 @@ export default function Header() {
 							금융 운영 자동화
 						</h1>
 					</div>
-					<div className="flex items-center gap-2">
-						<Button variant="outline" size="sm">
-							<Settings className="w-4 h-4 mr-2" />
-							설정
-						</Button>
-						<Avatar>
-							<AvatarImage src="/user-avatar.jpg" />
-							<AvatarFallback>관리자</AvatarFallback>
-						</Avatar>
-					</div>
 				</div>
 			</div>
 		</header>

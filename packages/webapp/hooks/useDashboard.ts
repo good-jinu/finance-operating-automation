@@ -8,7 +8,6 @@ import type {
 
 export function useDashboard() {
 	const [activeTab, setActiveTab] = useState<TabValue>("dashboard");
-	const [chatMessage, setChatMessage] = useState("");
 	const [guideline, setGuideline] = useState("");
 
 	const finOpsStats: FinOpsStats = {
@@ -97,8 +96,6 @@ export function useDashboard() {
 					break;
 			}
 		},
-		chatMessage,
-		setChatMessage,
 		guideline,
 		setGuideline,
 		finOpsStats,

@@ -26,7 +26,7 @@ function encodeSubject(subject: string): string {
 	}
 
 	// UTF-8로 인코딩하고 Base64로 변환 후 RFC 2047 형식으로 래핑
-	const encodedSubject = `=?UTF-8?B?${Buffer.from(subject, 'utf-8').toString('base64')}?=`;
+	const encodedSubject = `=?UTF-8?B?${Buffer.from(subject, "utf-8").toString("base64")}?=`;
 	return encodedSubject;
 }
 
@@ -378,5 +378,91 @@ export class GmailClient {
 		}
 
 		return false;
+	}
+
+	/**
+	 * 메시지에서 특정 파일명의 첨부파일을 찾습니다.
+	 */
+	private findAttachment(
+		parts: gmail_v1.Schema$MessagePart[],
+		filename: string,
+	): gmail_v1.Schema$MessagePart | undefined {
+		for (const part of parts) {
+			if (
+				part.filename === decodeURIComponent(filename) &&
+				part.body?.attachmentId
+			) {
+				return part;
+			}
+			if (part.parts) {
+				const found = this.findAttachment(part.parts, filename);
+				if (found) return found;
+			}
+		}
+		return undefined;
+	}
+
+	/**
+	 * 첨부파일을 다운로드합니다.
+	 */
+	async downloadAttachment(
+		messageId: string,
+		filename: string,
+		userId: string = "me",
+	): Promise<{
+		buffer: Buffer;
+		contentType: string;
+		filename: string;
+	}> {
+		try {
+			// 메시지 상세 정보 가져오기
+			const message = await this.service.users.messages.get({
+				userId,
+				id: messageId,
+			});
+
+			if (!message.data.payload?.parts) {
+				throw new Error("첨부파일을 찾을 수 없습니다");
+			}
+
+			// 첨부파일 찾기
+			const attachment = this.findAttachment(
+				message.data.payload.parts,
+				filename,
+			);
+
+			if (!attachment || !attachment.body?.attachmentId) {
+				throw new Error("첨부파일을 찾을 수 없습니다");
+			}
+
+			// 첨부파일 데이터 가져오기
+			const attachmentData = await this.service.users.messages.attachments.get({
+				userId,
+				messageId: messageId,
+				id: attachment.body.attachmentId,
+			});
+
+			if (!attachmentData.data.data) {
+				throw new Error("첨부파일 데이터를 가져올 수 없습니다");
+			}
+
+			// Base64 디코딩
+			const buffer = Buffer.from(attachmentData.data.data, "base64url");
+
+			// Content-Type 결정
+			const contentType = attachment.mimeType || "application/octet-stream";
+
+			return {
+				buffer,
+				contentType,
+				filename: attachment.filename || filename,
+			};
+		} catch (error) {
+			console.error(
+				`첨부파일 다운로드 중 오류 (${messageId}/${filename}):`,
+				error,
+			);
+			throw error;
+		}
 	}
 }

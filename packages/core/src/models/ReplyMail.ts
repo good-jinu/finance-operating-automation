@@ -2,7 +2,7 @@ import db from "../database";
 
 export interface ReplyMail {
 	id?: number;
-	original_message_id: number;
+	original_message_id: string;
 	subject: string;
 	reply_body: string;
 	attachments?: string; // JSON string of attachments
@@ -61,7 +61,7 @@ export function findReplyMailsByStatus(
 			gm.subject as original_subject,
 			gm.body as original_body
 		FROM reply_mails rm
-		INNER JOIN gmail_messages gm ON rm.original_message_id = gm.id
+		INNER JOIN gmail_messages gm ON rm.original_message_id = gm.message_id
 		WHERE rm.is_sent = ?
 		ORDER BY rm.created_at DESC
 		LIMIT ?
@@ -77,7 +77,7 @@ export function findAllReplyMails(limit: number = 50): ReplyMailWithOriginal[] {
 			gm.subject as original_subject,
 			gm.body as original_body
 		FROM reply_mails rm
-		INNER JOIN gmail_messages gm ON rm.original_message_id = gm.id
+		INNER JOIN gmail_messages gm ON rm.original_message_id = gm.message_id
 		ORDER BY rm.created_at DESC
 		LIMIT ?
 	`);
