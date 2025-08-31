@@ -15,29 +15,10 @@ interface DashboardTabProps {
 	error?: Error | null;
 }
 
-export default function DashboardTab({
-	recentEmails,
-	isAutoReplyRunning,
-	autoReplyLogs,
-	onStartAutoReply,
-	onStopAutoReply,
-	isPending = false,
-	isSuccess = false,
-	isError = false,
-	error = null,
-}: DashboardTabProps) {
+export default function DashboardTab({ recentEmails }: DashboardTabProps) {
 	return (
 		<div className="space-y-6">
-			<MailAndAutoReplySection
-				isAutoReplyRunning={isAutoReplyRunning}
-				autoReplyLogs={autoReplyLogs}
-				onStartAutoReply={onStartAutoReply}
-				onStopAutoReply={onStopAutoReply}
-				isPending={isPending}
-				isSuccess={isSuccess}
-				isError={isError}
-				error={error}
-			/>
+			<MailAndAutoReplySection />
 
 			<RecentActivitySection recentEmails={recentEmails} />
 		</div>

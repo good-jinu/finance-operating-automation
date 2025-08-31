@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
 	try {
 		const { searchParams } = new URL(request.url);
 		const unsentOnly = searchParams.get("unsentOnly") === "true";
-		const limit = parseInt(searchParams.get("limit") || "50");
+		const limit = parseInt(searchParams.get("limit") || "50", 10);
 
 		const { replyMails, totalCount } = getReplyMails(unsentOnly, limit);
 

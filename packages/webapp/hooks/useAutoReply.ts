@@ -1,3 +1,4 @@
+import type { EmailLog } from "@finance-operating-automation/core/models";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AutoReplyLog } from "@/types/dashboard";
 
@@ -18,12 +19,12 @@ export function useAutoReply() {
 	// 이메일 로그 가져오기
 	const { data: logsData } = useQuery({
 		queryKey: ["autoReplyLogs"],
-		queryFn: async () => {
+		queryFn: async (): Promise<EmailLog[]> => {
 			const response = await fetch("/api/auto-reply?action=logs");
 			if (!response.ok) {
 				throw new Error("로그 가져오기 실패");
 			}
-			return response.json();
+			return (await response.json()).logs as EmailLog[];
 		},
 		refetchInterval: 5000, // 5초마다 로그 새로고침
 	});
@@ -71,12 +72,14 @@ export function useAutoReply() {
 
 	const isAutoReplyRunning = statusData?.isRunning || false;
 	const autoReplyLogs: AutoReplyLog[] =
-		logsData?.logs?.map((log: any) => ({
-			id: log.id.toString(),
+		logsData?.map((log: EmailLog) => ({
+			id: log.id?.toString(),
 			subject: log.subject,
 			sender: log.sender,
 			status: log.status === "success" ? "success" : "error",
-			timestamp: new Date(log.created_at).toLocaleTimeString("ko-KR"),
+			timestamp: log.created_at
+				? new Date(log.created_at).toLocaleTimeString("ko-KR")
+				: new Date().toLocaleTimeString("ko-KR"),
 			message:
 				log.status === "success"
 					? "자동 답변 전송 완료"

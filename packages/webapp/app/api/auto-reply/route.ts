@@ -1,6 +1,5 @@
 import {
 	getRecentEmailLogs,
-	type ReplyProgress,
 	replyUnreadMail,
 } from "@finance-operating-automation/core";
 import { type NextRequest, NextResponse } from "next/server";

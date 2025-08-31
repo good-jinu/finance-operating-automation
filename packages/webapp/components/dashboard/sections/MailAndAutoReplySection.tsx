@@ -4,7 +4,6 @@ import {
 	Clock,
 	Mail,
 	Paperclip,
-	Pause,
 	Play,
 	RefreshCw,
 	Send,
@@ -22,7 +21,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMailSync } from "@/hooks/useMailSync";
@@ -32,28 +30,8 @@ import {
 	useReplyMails,
 	useSendReplyMail,
 } from "@/hooks/useReplyMails";
-import type { AutoReplyLog } from "@/types/dashboard";
 
-interface MailAndAutoReplySectionProps {
-	isAutoReplyRunning: boolean;
-	autoReplyLogs: AutoReplyLog[];
-	onStartAutoReply: () => void;
-	onStopAutoReply: () => void;
-	isPending?: boolean;
-	isSuccess?: boolean;
-	isError?: boolean;
-	error?: Error | null;
-}
-
-export default function MailAndAutoReplySection({
-	isAutoReplyRunning,
-	autoReplyLogs,
-	onStartAutoReply,
-	onStopAutoReply,
-	isPending = false,
-	isSuccess = false,
-	isError = false,
-}: MailAndAutoReplySectionProps) {
+export default function MailAndAutoReplySection() {
 	const [isUnreadOnly, setIsUnreadOnly] = useState(false);
 	const [isUnsentOnly, setIsUnsentOnly] = useState(true);
 
@@ -358,9 +336,10 @@ export default function MailAndAutoReplySection({
 																</div>
 																<div className="flex flex-wrap gap-1">
 																	{JSON.parse(replyMail.attachments).map(
+																		// biome-ignore lint:suspicious/noExplicitAny
 																		(attachment: any, index: number) => (
 																			<Badge
-																				key={index}
+																				key={attachment.filename}
 																				variant="outline"
 																				className="text-xs px-2 py-1"
 																			>

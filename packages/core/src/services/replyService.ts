@@ -1,8 +1,5 @@
 import { ClientPaymentSupportAgent } from "../agent";
-import {
-	findUnreadGmailMessages,
-	updateGmailMessageReadStatus,
-} from "../models/GmailMessage";
+import { findUnreadGmailMessages } from "../models/GmailMessage";
 import {
 	countReplyMails,
 	countUnsentReplyMails,
@@ -10,7 +7,6 @@ import {
 	findAllReplyMails,
 	findReplyMailById,
 	findReplyMailsByStatus,
-	type ReplyMail,
 	updateReplyMailSentStatus,
 } from "../models/ReplyMail";
 import { buildGmailService, getCredentials } from "./auth";
