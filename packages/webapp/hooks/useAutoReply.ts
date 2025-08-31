@@ -70,14 +70,18 @@ export function useAutoReply() {
 	});
 
 	const isAutoReplyRunning = statusData?.isRunning || false;
-	const autoReplyLogs: AutoReplyLog[] = logsData?.logs?.map((log: any) => ({
-		id: log.id.toString(),
-		subject: log.subject,
-		sender: log.sender,
-		status: log.status === "success" ? "success" : "error",
-		timestamp: new Date(log.created_at).toLocaleTimeString("ko-KR"),
-		message: log.status === "success" ? "자동 답변 전송 완료" : log.error_message || "오류 발생",
-	})) || [];
+	const autoReplyLogs: AutoReplyLog[] =
+		logsData?.logs?.map((log: any) => ({
+			id: log.id.toString(),
+			subject: log.subject,
+			sender: log.sender,
+			status: log.status === "success" ? "success" : "error",
+			timestamp: new Date(log.created_at).toLocaleTimeString("ko-KR"),
+			message:
+				log.status === "success"
+					? "자동 답변 전송 완료"
+					: log.error_message || "오류 발생",
+		})) || [];
 
 	return {
 		isAutoReplyRunning,

@@ -12,18 +12,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { useMails } from "@/hooks/useMails";
 import { useMailSync } from "@/hooks/useMailSync";
+import { useMails } from "@/hooks/useMails";
 
 export default function MailList() {
 	const [isUnreadOnly, setIsUnreadOnly] = useState(false);
 
 	// 메일 목록 조회
-	const {
-		data: mailsData,
-		isLoading,
-		error,
-	} = useMails(isUnreadOnly);
+	const { data: mailsData, isLoading, error } = useMails(isUnreadOnly);
 
 	// 메일 동기화
 	const syncMailsMutation = useMailSync();

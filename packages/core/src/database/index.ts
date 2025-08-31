@@ -24,7 +24,6 @@ const initializeDatabase = () => {
     )
   `);
 
-
 	// Gmail 메시지 테이블
 	db.exec(`
     CREATE TABLE IF NOT EXISTS gmail_messages (
@@ -43,6 +42,22 @@ const initializeDatabase = () => {
       has_attachments BOOLEAN DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+	// 답변 메일 테이블
+	db.exec(`
+    CREATE TABLE IF NOT EXISTS reply_mails (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      original_message_id INTEGER NOT NULL,
+      subject TEXT NOT NULL,
+      reply_body TEXT NOT NULL,
+      attachments TEXT,
+      is_sent BOOLEAN DEFAULT 0,
+      sent_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (original_message_id) REFERENCES gmail_messages (id)
     )
   `);
 };
