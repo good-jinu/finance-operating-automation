@@ -1,3 +1,3 @@
 export type { EmailLog } from "./EmailLog";
 export type { GmailMessage } from "./GmailMessage";
-export type { ReplyMailWithOriginal, ReplyMail } from "./ReplyMail";
+export type { ReplyMail, ReplyMailWithOriginal } from "./ReplyMail";

@@ -79,6 +79,21 @@ export function updateGmailMessageReadStatus(
 	return result.changes > 0;
 }
 
+export function updateGmailMessageLabelsAndReadStatus(
+	messageId: string,
+	labels: string,
+	isUnread: boolean,
+): boolean {
+	const stmt = db.prepare(`
+		UPDATE gmail_messages 
+		SET labels = ?, is_unread = ?, updated_at = CURRENT_TIMESTAMP
+		WHERE message_id = ?
+	`);
+
+	const result = stmt.run(labels, isUnread ? 1 : 0, messageId);
+	return result.changes > 0;
+}
+
 export function findRecentGmailMessages(limit: number = 50): GmailMessage[] {
 	const stmt = db.prepare(
 		"SELECT * FROM gmail_messages ORDER BY internal_date DESC, created_at DESC LIMIT ?",
@@ -108,4 +123,15 @@ export function findUnreadGmailMessages(
 		"SELECT * FROM gmail_messages WHERE is_unread = 1 ORDER BY internal_date DESC, created_at DESC LIMIT ? OFFSET ?",
 	);
 	return stmt.all(limit, offset) as GmailMessage[];
+}
+
+export function findGmailMessagesByIds(ids: number[]): GmailMessage[] {
+	if (ids.length === 0) {
+		return [];
+	}
+	const placeholders = ids.map(() => "?").join(", ");
+	const stmt = db.prepare(
+		`SELECT * FROM gmail_messages WHERE id IN (${placeholders}) ORDER BY internal_date DESC, created_at DESC`,
+	);
+	return stmt.all(...ids) as GmailMessage[];
 }

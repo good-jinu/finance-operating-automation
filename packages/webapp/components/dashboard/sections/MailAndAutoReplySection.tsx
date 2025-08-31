@@ -19,6 +19,7 @@ import { ReplyMailList } from "./contents/ReplyMailList";
 export default function MailAndAutoReplySection() {
 	const [isUnreadOnly, setIsUnreadOnly] = useState(false);
 	const [isUnsentOnly, setIsUnsentOnly] = useState(true);
+	const [selectedMailIds, setSelectedMailIds] = useState<number[]>([]);
 
 	// 메일 동기화
 	const syncMailsMutation = useMailSync();
@@ -54,7 +55,7 @@ export default function MailAndAutoReplySection() {
 			</CardHeader>
 			<CardContent className="space-y-4">
 				{/* AI Reply Generation Control Section */}
-				<AIReplyGenerationControl />
+				<AIReplyGenerationControl selectedMailIds={selectedMailIds} />
 
 				{/* Tabs for Mail List and Reply Mails */}
 				<Tabs defaultValue="mails" className="flex-1">
@@ -64,16 +65,18 @@ export default function MailAndAutoReplySection() {
 					</TabsList>
 
 					<TabsContent value="mails" className="mt-4">
-						<MailList 
-							isUnreadOnly={isUnreadOnly} 
-							onToggleUnreadOnly={() => setIsUnreadOnly(!isUnreadOnly)} 
+						<MailList
+							isUnreadOnly={isUnreadOnly}
+							onToggleUnreadOnly={() => setIsUnreadOnly(!isUnreadOnly)}
+							selectedMailIds={selectedMailIds}
+							onSelectedMailIdsChange={setSelectedMailIds}
 						/>
 					</TabsContent>
 
 					<TabsContent value="replies" className="mt-4">
-						<ReplyMailList 
-							isUnsentOnly={isUnsentOnly} 
-							onToggleUnsentOnly={() => setIsUnsentOnly(!isUnsentOnly)} 
+						<ReplyMailList
+							isUnsentOnly={isUnsentOnly}
+							onToggleUnsentOnly={() => setIsUnsentOnly(!isUnsentOnly)}
 						/>
 					</TabsContent>
 				</Tabs>

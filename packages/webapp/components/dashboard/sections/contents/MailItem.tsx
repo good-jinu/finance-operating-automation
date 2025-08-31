@@ -1,15 +1,21 @@
 "use client";
 
-import { Clock, Paperclip, User } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import type { GmailMessage } from "@finance-operating-automation/core/models";
+import { Clock, Paperclip } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import {GmailMessage} from "@finance-operating-automation/core/models";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface MailItemProps {
 	mail: GmailMessage;
+	isSelected?: boolean;
+	onSelectChange?: (selected: boolean) => void;
 }
 
-export function MailItem({ mail }: MailItemProps) {
+export function MailItem({
+	mail,
+	isSelected = false,
+	onSelectChange,
+}: MailItemProps) {
 	const formatDate = (internalDate?: string) => {
 		if (!internalDate) return "";
 
@@ -29,19 +35,19 @@ export function MailItem({ mail }: MailItemProps) {
 	return (
 		<div
 			className={`flex items-start gap-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors ${
-				mail.is_unread ? "border-primary/50 bg-primary/5" : ""
+				isSelected ? "border-primary/50 bg-primary/5" : ""
 			}`}
+			role={"listbox"}
+			onKeyUp={() => onSelectChange?.(!isSelected)}
 		>
-			<Avatar className="w-10 h-10">
-				<AvatarFallback>
-					<User className="w-4 h-4" />
-				</AvatarFallback>
-			</Avatar>
+			<Checkbox
+				checked={isSelected}
+				onCheckedChange={(checked) => onSelectChange?.(!!checked)}
+				className="mt-1"
+			/>
 			<div className="flex-1 min-w-0">
 				<div className="flex items-center gap-2 mb-1">
-					<p className="text-sm font-medium truncate">
-						{mail.sender}
-					</p>
+					<p className="text-sm font-medium truncate">{mail.sender}</p>
 					{!!mail.is_unread && (
 						<div className="w-2 h-2 bg-primary rounded-full" />
 					)}

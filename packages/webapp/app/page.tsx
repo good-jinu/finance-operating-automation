@@ -18,17 +18,11 @@ export default function AIEmailDashboard() {
 		setChatMessage,
 		guideline,
 		setGuideline,
-		finOpsStats,
 		recentEmails,
 		aiGuidelines,
 	} = useDashboard();
 
-	const {
-		isAutoReplyRunning,
-		autoReplyLogs,
-		handleAutoReply,
-		handleStopAutoReply,
-	} = useAutoReply();
+	const { isAutoReplyRunning, handleAutoReply } = useAutoReply();
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -51,14 +45,7 @@ export default function AIEmailDashboard() {
 							</TabsList>
 
 							<TabsContent value="dashboard">
-								<DashboardTab
-									stats={finOpsStats}
-									recentEmails={recentEmails}
-									isAutoReplyRunning={isAutoReplyRunning}
-									autoReplyLogs={autoReplyLogs}
-									onStartAutoReply={handleAutoReply}
-									onStopAutoReply={handleStopAutoReply}
-								/>
+								<DashboardTab recentEmails={recentEmails} />
 							</TabsContent>
 
 							<TabsContent value="inbox">

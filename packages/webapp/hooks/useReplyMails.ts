@@ -39,19 +39,28 @@ export function useReplyMails(unsentOnly: boolean = false) {
 export function useGenerateReplies() {
 	const queryClient = useQueryClient();
 
-	return useMutation<GenerateRepliesResponse>({
-		mutationFn: async () => {
+	return useMutation<GenerateRepliesResponse, Error, { mailIds: number[] }>({
+		mutationFn: async ({ mailIds }) => {
 			const response = await fetch("/api/reply-mails/generate", {
 				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ mailIds }),
 			});
 			if (!response.ok) {
-				throw new Error("Failed to generate replies");
+				const errorData = await response
+					.json()
+					.catch(() => ({ message: "Failed to generate replies" }));
+				throw new Error(errorData.message || "Failed to generate replies");
 			}
 			return response.json();
 		},
 		onSuccess: () => {
 			// 답변 메일 목록 새로고침
 			queryClient.invalidateQueries({ queryKey: ["reply-mails"] });
+			// 원본 메일 목록도 새로고침하여 '답변 생성됨' 상태 등을 업데이트 할 수 있도록 함
+			queryClient.invalidateQueries({ queryKey: ["mails"] });
 		},
 	});
 }

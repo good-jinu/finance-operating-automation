@@ -5,8 +5,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useGenerateReplies } from "@/hooks/useReplyMails";
 
-export function AIReplyGenerationControl() {
+interface AIReplyGenerationControlProps {
+	selectedMailIds: number[];
+}
+
+export function AIReplyGenerationControl({
+	selectedMailIds,
+}: AIReplyGenerationControlProps) {
 	const generateRepliesMutation = useGenerateReplies();
+
+	const handleGenerateReplies = () => {
+		if (selectedMailIds.length > 0) {
+			generateRepliesMutation.mutate({ mailIds: selectedMailIds });
+		}
+	};
 
 	return (
 		<div className="p-4 bg-muted/20 rounded-lg space-y-4">
@@ -34,26 +46,29 @@ export function AIReplyGenerationControl() {
 										: "대기"}
 						</Badge>
 					</div>
-					{generateRepliesMutation.isError &&
-						generateRepliesMutation.error && (
-							<div className="text-sm text-destructive">
-								{generateRepliesMutation.error.message}
-							</div>
-						)}
+					{generateRepliesMutation.isError && generateRepliesMutation.error && (
+						<div className="text-sm text-destructive">
+							{generateRepliesMutation.error.message}
+						</div>
+					)}
 				</div>
 				<div className="flex items-center gap-2">
 					<Button
-						onClick={() => generateRepliesMutation.mutate()}
+						onClick={handleGenerateReplies}
 						className="gap-2"
 						size="sm"
-						disabled={generateRepliesMutation.isPending}
+						disabled={
+							generateRepliesMutation.isPending || selectedMailIds.length === 0
+						}
 					>
 						{generateRepliesMutation.isPending ? (
 							<RefreshCw className="w-4 h-4 animate-spin" />
 						) : (
 							<Play className="w-4 h-4" />
 						)}
-						{generateRepliesMutation.isPending ? "생성 중..." : "답변 생성"}
+						{generateRepliesMutation.isPending
+							? "생성 중..."
+							: `선택 답변 생성 (${selectedMailIds.length})`}
 					</Button>
 					<Button variant="outline" size="sm">
 						<Settings className="w-4 h-4" />

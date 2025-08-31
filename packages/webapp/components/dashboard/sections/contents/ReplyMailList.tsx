@@ -11,7 +11,10 @@ interface ReplyMailListProps {
 	onToggleUnsentOnly: () => void;
 }
 
-export function ReplyMailList({ isUnsentOnly, onToggleUnsentOnly }: ReplyMailListProps) {
+export function ReplyMailList({
+	isUnsentOnly,
+	onToggleUnsentOnly,
+}: ReplyMailListProps) {
 	const {
 		data: replyMailsData,
 		isLoading: isReplyMailsLoading,
@@ -26,9 +29,7 @@ export function ReplyMailList({ isUnsentOnly, onToggleUnsentOnly }: ReplyMailLis
 					variant="outline"
 					size="sm"
 					onClick={onToggleUnsentOnly}
-					className={
-						isUnsentOnly ? "bg-primary text-primary-foreground" : ""
-					}
+					className={isUnsentOnly ? "bg-primary text-primary-foreground" : ""}
 				>
 					{isUnsentOnly ? "전체 보기" : "미전송만"}
 				</Button>
@@ -44,8 +45,7 @@ export function ReplyMailList({ isUnsentOnly, onToggleUnsentOnly }: ReplyMailLis
 				</div>
 			) : !replyMailsData?.data || replyMailsData.data.length === 0 ? (
 				<div className="flex items-center justify-center h-96 text-muted-foreground">
-					답변 메일이 없습니다. '답변 생성' 버튼을 눌러 답변을
-					생성해보세요.
+					답변 메일이 없습니다. '답변 생성' 버튼을 눌러 답변을 생성해보세요.
 				</div>
 			) : (
 				<ScrollArea className="h-[400px]">

@@ -1,11 +1,11 @@
 "use client";
 
+import type { ReplyMailWithOriginal } from "@finance-operating-automation/core/models";
 import { Paperclip, RefreshCw, Send, User } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useSendReplyMail } from "@/hooks/useReplyMails";
-import {type ReplyMailWithOriginal} from "@finance-operating-automation/core/models";
 
 interface ReplyMailItemProps {
 	replyMail: ReplyMailWithOriginal;
@@ -38,17 +38,13 @@ export function ReplyMailItem({ replyMail }: ReplyMailItemProps) {
 								<Paperclip className="w-3 h-3 text-muted-foreground" />
 							)}
 						<Badge
-							variant={
-								replyMail.is_sent ? "default" : "secondary"
-							}
+							variant={replyMail.is_sent ? "default" : "secondary"}
 							className="text-xs"
 						>
 							{replyMail.is_sent ? "전송됨" : "미전송"}
 						</Badge>
 						<span className="text-xs text-muted-foreground ml-auto">
-							{new Date(
-								replyMail.created_at || "",
-							).toLocaleDateString()}
+							{new Date(replyMail.created_at || "").toLocaleDateString()}
 						</span>
 					</div>
 					<p className="text-sm font-medium text-foreground mb-1 truncate">
@@ -66,8 +62,7 @@ export function ReplyMailItem({ replyMail }: ReplyMailItemProps) {
 								<div className="flex items-center gap-2 mb-2">
 									<Paperclip className="w-3 h-3 text-muted-foreground" />
 									<span className="text-xs font-medium text-muted-foreground">
-										첨부파일 (
-										{JSON.parse(replyMail.attachments).length}
+										첨부파일 ({JSON.parse(replyMail.attachments).length}
 										개)
 									</span>
 								</div>
@@ -80,12 +75,10 @@ export function ReplyMailItem({ replyMail }: ReplyMailItemProps) {
 												variant="outline"
 												className="text-xs px-2 py-1"
 											>
-												{attachment.filename ||
-													`첨부파일 ${index + 1}`}
+												{attachment.filename || `첨부파일 ${index + 1}`}
 												{attachment.size && (
 													<span className="ml-1 text-muted-foreground">
-														(
-														{Math.round(attachment.size / 1024)}
+														({Math.round(attachment.size / 1024)}
 														KB)
 													</span>
 												)}
@@ -101,8 +94,7 @@ export function ReplyMailItem({ replyMail }: ReplyMailItemProps) {
 								size="sm"
 								variant="default"
 								onClick={() =>
-									replyMail.id &&
-									sendReplyMailMutation.mutate(replyMail.id)
+									replyMail.id && sendReplyMailMutation.mutate(replyMail.id)
 								}
 								disabled={sendReplyMailMutation.isPending}
 								className="gap-2"
@@ -117,10 +109,7 @@ export function ReplyMailItem({ replyMail }: ReplyMailItemProps) {
 						)}
 						{replyMail.sent_at && (
 							<span className="text-xs text-muted-foreground">
-								전송일:{" "}
-								{new Date(
-									replyMail.sent_at,
-								).toLocaleDateString()}
+								전송일: {new Date(replyMail.sent_at).toLocaleDateString()}
 							</span>
 						)}
 					</div>

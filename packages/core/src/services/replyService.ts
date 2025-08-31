@@ -1,5 +1,8 @@
 import { ClientPaymentSupportAgent } from "../agent";
-import { findUnreadGmailMessages } from "../models/GmailMessage";
+import {
+	findGmailMessagesByIds,
+	findUnreadGmailMessages,
+} from "../models/GmailMessage";
 import {
 	countReplyMails,
 	countUnsentReplyMails,
@@ -23,6 +26,99 @@ export interface GenerateRepliesProgress {
 		sender: string;
 		status: "processing" | "success" | "error";
 	};
+}
+
+export async function generateRepliesForMails(
+	mailIds: number[],
+	progressCallback?: (progress: GenerateRepliesProgress) => void,
+) {
+	try {
+		const writer = new ClientPaymentSupportAgent();
+		const messages = findGmailMessagesByIds(mailIds);
+
+		if (!messages || messages.length === 0) {
+			console.log("답변을 생성할 메일이 없습니다.");
+			return {
+				totalEmails: 0,
+				processedEmails: 0,
+				successCount: 0,
+				errorCount: 0,
+				status: "completed" as const,
+			};
+		}
+
+		let successCount = 0;
+		let errorCount = 0;
+
+		console.log(`메일 ${messages.length}개에 대한 답변 생성 시작`);
+
+		for (let i = 0; i < messages.length; i++) {
+			const message = messages[i];
+
+			try {
+				console.log(
+					`답변 생성 중: ${message.subject || ""} (${i + 1}/${messages.length})`,
+				);
+
+				// AI가 답장 본문 작성
+				const replyResult = await writer.generateReply(
+					message.subject || "",
+					message.body || message.snippet || "",
+				);
+
+				// reply_mails 테이블에 답변 저장 (전송하지 않은 상태로)
+				if (message.id) {
+					createReplyMail({
+						original_message_id: message.id,
+						subject: `Re: ${message.subject || "No Subject"}`,
+						reply_body: replyResult.mail_body,
+						attachments: JSON.stringify(replyResult.attachments),
+						is_sent: false,
+					});
+				}
+
+				successCount++;
+				console.log(`답변 생성 완료: ${message.subject}`);
+			} catch (error) {
+				console.error(`메일 답변 생성 중 오류 (${message.id}):`, error);
+				errorCount++;
+			}
+		}
+
+		const finalProgress: GenerateRepliesProgress = {
+			totalEmails: messages.length,
+			processedEmails: messages.length,
+			successCount,
+			errorCount,
+			status: "completed",
+		};
+
+		if (progressCallback) {
+			progressCallback(finalProgress);
+		}
+
+		console.log(
+			`답변 생성 완료: 총 ${messages.length}개, 성공 ${successCount}개, 실패 ${errorCount}개`,
+		);
+
+		return finalProgress;
+	} catch (error) {
+		console.error(`답변 생성 중 전체 오류:`, error);
+
+		const errorProgress: GenerateRepliesProgress = {
+			totalEmails: mailIds.length,
+			processedEmails: 0,
+			successCount: 0,
+			errorCount: mailIds.length,
+			status: "error",
+		};
+
+		if (progressCallback) {
+			progressCallback(errorProgress);
+		}
+
+		throw error;
+	}
 }
 
 /**

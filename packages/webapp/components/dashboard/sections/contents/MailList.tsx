@@ -1,30 +1,74 @@
 "use client";
 
 import { RefreshCw } from "lucide-react";
+import { useEffect, useId } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useMails } from "@/hooks/useMails";
 import { MailItem } from "./MailItem";
 
 interface MailListProps {
 	isUnreadOnly: boolean;
 	onToggleUnreadOnly: () => void;
+	selectedMailIds: number[];
+	onSelectedMailIdsChange: (ids: number[]) => void;
 }
 
-export function MailList({ isUnreadOnly, onToggleUnreadOnly }: MailListProps) {
+export function MailList({
+	isUnreadOnly,
+	onToggleUnreadOnly,
+	selectedMailIds,
+	onSelectedMailIdsChange,
+}: MailListProps) {
 	const { data: mailsData, isLoading, error } = useMails(isUnreadOnly);
 	const mails = mailsData?.data || [];
+	const selectAllId = useId();
+
+	useEffect(() => {
+		onSelectedMailIdsChange([]);
+	}, [onSelectedMailIdsChange]);
+
+	const handleSelectAll = (checked: boolean) => {
+		if (checked) {
+			onSelectedMailIdsChange(mails.map((mail) => mail.id ?? NaN));
+		} else {
+			onSelectedMailIdsChange([]);
+		}
+	};
+
+	const handleSelectOne = (id: number, checked: boolean) => {
+		if (checked) {
+			onSelectedMailIdsChange([...selectedMailIds, id]);
+		} else {
+			onSelectedMailIdsChange(
+				selectedMailIds.filter((mailId) => mailId !== id),
+			);
+		}
+	};
+
+	const areAllSelected =
+		mails.length > 0 && selectedMailIds.length === mails.length;
 
 	return (
 		<div>
 			<div className="flex items-center justify-between mb-3">
-				<h4 className="text-sm font-medium">메일 목록</h4>
+				<div className="flex items-center gap-2">
+					<Checkbox
+						id={selectAllId}
+						checked={areAllSelected}
+						onCheckedChange={handleSelectAll}
+						disabled={mails.length === 0}
+					/>
+					<label htmlFor="select-all" className="text-sm font-medium">
+						{areAllSelected ? "전체 선택 해제" : "전체 선택"} (
+						{selectedMailIds.length})
+					</label>
+				</div>
 				<Button
 					variant="outline"
 					size="sm"
 					onClick={onToggleUnreadOnly}
-					className={
-						isUnreadOnly ? "bg-primary text-primary-foreground" : ""
-					}
+					className={isUnreadOnly ? "bg-primary text-primary-foreground" : ""}
 				>
 					{isUnreadOnly ? "전체 보기" : "읽지 않음만"}
 				</Button>
@@ -46,7 +90,14 @@ export function MailList({ isUnreadOnly, onToggleUnreadOnly }: MailListProps) {
 				<div className="h-[400px] overflow-auto">
 					<div className="space-y-2">
 						{mails.map((mail) => (
-							<MailItem key={mail.id} mail={mail} />
+							<MailItem
+								key={mail.id}
+								mail={mail}
+								isSelected={selectedMailIds.includes(mail.id ?? NaN)}
+								onSelectChange={(checked) =>
+									handleSelectOne(mail.id ?? NaN, checked)
+								}
+							/>
 						))}
 					</div>
 				</div>

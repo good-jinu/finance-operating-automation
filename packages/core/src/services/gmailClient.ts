@@ -5,6 +5,7 @@ import {
 	findRecentGmailMessages,
 	findUnreadGmailMessages,
 	type GmailMessage,
+	updateGmailMessageLabelsAndReadStatus,
 } from "../models/GmailMessage";
 import { readAttachments } from "../utils/fileReader";
 import {
@@ -173,9 +174,15 @@ export class GmailClient {
 		userId: string = "me",
 		query: string = "",
 		maxResults: number = 100,
-	): Promise<{ synced: number; skipped: number; errors: number }> {
+	): Promise<{
+		synced: number;
+		skipped: number;
+		updated: number;
+		errors: number;
+	}> {
 		let synced = 0;
 		let skipped = 0;
+		let updated = 0;
 		let errors = 0;
 
 		try {
@@ -192,15 +199,39 @@ export class GmailClient {
 				if (!messageRef.id) continue;
 
 				try {
+					// Gmail에서 전체 메시지 정보를 가져옵니다
+					const fullMessage = await this.getMessage(messageRef.id, userId);
+
+					// 현재 Gmail 메시지의 상태
+					const currentLabels = JSON.stringify(fullMessage.labelIds || []);
+					const currentIsUnread =
+						fullMessage.labelIds?.includes("UNREAD") || false;
+
 					// 이미 DB에 존재하는 메시지인지 확인
 					const existingMessage = findGmailMessageByMessageId(messageRef.id);
 					if (existingMessage) {
-						skipped++;
+						// labels와 is_unread 상태가 변경되었는지 확인
+						const labelsChanged = existingMessage.labels !== currentLabels;
+						const unreadChanged = existingMessage.is_unread !== currentIsUnread;
+
+						if (labelsChanged || unreadChanged) {
+							// 변경사항이 있으면 DB 업데이트
+							const updateSuccess = updateGmailMessageLabelsAndReadStatus(
+								messageRef.id,
+								currentLabels,
+								currentIsUnread,
+							);
+							if (updateSuccess) {
+								updated++;
+							} else {
+								console.warn(`메시지 ${messageRef.id} 업데이트 실패`);
+								errors++;
+							}
+						} else {
+							skipped++;
+						}
 						continue;
 					}
-
-					// Gmail에서 전체 메시지 정보를 가져옵니다
-					const fullMessage = await this.getMessage(messageRef.id, userId);
 
 					// 메시지 정보를 파싱합니다
 					const headers = fullMessage.payload?.headers || [];
@@ -224,10 +255,10 @@ export class GmailClient {
 						recipient: extractEmail(to) || to,
 						body,
 						snippet: fullMessage.snippet || "",
-						labels: JSON.stringify(fullMessage.labelIds || []),
+						labels: currentLabels,
 						internal_date: fullMessage.internalDate || "",
 						size_estimate: fullMessage.sizeEstimate || 0,
-						is_unread: fullMessage.labelIds?.includes("UNREAD") || false,
+						is_unread: currentIsUnread,
 						has_attachments: hasAttachments,
 					};
 
@@ -244,7 +275,7 @@ export class GmailClient {
 			throw error;
 		}
 
-		return { synced, skipped, errors };
+		return { synced, skipped, updated, errors };
 	}
 
 	/**
