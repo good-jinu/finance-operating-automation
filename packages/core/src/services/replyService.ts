@@ -1,8 +1,5 @@
 import { ClientPaymentSupportAgent } from "../agent";
-import {
-	findGmailMessagesByIds,
-	findUnreadGmailMessages,
-} from "../models/GmailMessage";
+import { findGmailMessagesByIds } from "../models/GmailMessage";
 import {
 	countReplyMails,
 	countUnsentReplyMails,
@@ -59,7 +56,10 @@ export async function generateRepliesForMails(
 			const service = buildGmailService(creds);
 			gmailClient = new GmailClient(service);
 		} catch (error) {
-			console.warn("Gmail 클라이언트 초기화 실패 - 읽음 표시 기능을 사용할 수 없습니다:", error);
+			console.warn(
+				"Gmail 클라이언트 초기화 실패 - 읽음 표시 기능을 사용할 수 없습니다:",
+				error,
+			);
 		}
 
 		for (let i = 0; i < messages.length; i++) {
@@ -93,7 +93,10 @@ export async function generateRepliesForMails(
 						await gmailClient.markEmailAsRead(message.message_id);
 						console.log(`메일 읽음 표시 완료: ${message.message_id}`);
 					} catch (markReadError) {
-						console.warn(`메일 읽음 표시 실패 (${message.message_id}):`, markReadError);
+						console.warn(
+							`메일 읽음 표시 실패 (${message.message_id}):`,
+							markReadError,
+						);
 						// 읽음 표시 실패는 전체 프로세스를 중단하지 않음
 					}
 				}

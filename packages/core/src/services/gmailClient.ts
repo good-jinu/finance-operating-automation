@@ -6,7 +6,6 @@ import {
 	findUnreadGmailMessages,
 	type GmailMessage,
 	updateGmailMessageLabelsAndReadStatus,
-	updateGmailMessageReadStatus,
 } from "../models/GmailMessage";
 import { readAttachments } from "../utils/fileReader";
 import {
@@ -322,7 +321,9 @@ export class GmailClient {
 				if (updateSuccess) {
 					console.log(`DB 업데이트 성공: ${messageId} - 읽음으로 표시됨`);
 				} else {
-					console.warn(`DB 업데이트 실패: ${messageId} - 메시지가 DB에 존재하지 않을 수 있습니다`);
+					console.warn(
+						`DB 업데이트 실패: ${messageId} - 메시지가 DB에 존재하지 않을 수 있습니다`,
+					);
 				}
 			} catch (dbError) {
 				console.error(`DB 업데이트 중 오류 발생 (${messageId}):`, dbError);
@@ -332,7 +333,10 @@ export class GmailClient {
 			console.log(`이메일이 읽음으로 처리되었습니다: ${messageId}`);
 			return response.data;
 		} catch (error) {
-			console.error(`이메일을 읽음으로 처리하는 중 오류 발생 (${messageId}):`, error);
+			console.error(
+				`이메일을 읽음으로 처리하는 중 오류 발생 (${messageId}):`,
+				error,
+			);
 			throw error;
 		}
 	}
