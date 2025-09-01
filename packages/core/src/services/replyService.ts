@@ -163,10 +163,11 @@ export async function sendReplyMail(replyMailId: number): Promise<boolean> {
 		const service = buildGmailService(creds);
 		const client = new GmailClient(service);
 
-		// 원본 메시지 가져오기 (Gmail API에서)
-		const originalMessageId = await getOriginalGmailMessageId(
-			replyMail.original_message_id,
+		console.log(
+			`replyMailId: ${replyMailId} - ${replyMail.id} / ${replyMail.original_message_id} - ${replyMail.subject} - ${replyMail.reply_body}`,
 		);
+		// 원본 메시지 가져오기 (Gmail API에서)
+		const originalMessageId = replyMail.original_message_id;
 		if (!originalMessageId) {
 			throw new Error("Original Gmail message ID not found");
 		}
@@ -233,16 +234,4 @@ export function getUnsentReplyMailsCount(): number {
  */
 export function getReplyMailById(id: number) {
 	return findReplyMailById(id);
-}
-
-/**
- * DB의 gmail_messages에서 Gmail API message_id 가져오기
- */
-async function getOriginalGmailMessageId(
-	dbMessageId: string,
-): Promise<string | null> {
-	const db = require("../database").default;
-	const stmt = db.prepare("SELECT message_id FROM gmail_messages WHERE id = ?");
-	const result = stmt.get(dbMessageId) as { message_id: string } | null;
-	return result?.message_id || null;
 }

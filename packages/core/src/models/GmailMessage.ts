@@ -135,3 +135,13 @@ export function findGmailMessagesByIds(ids: number[]): GmailMessage[] {
 	);
 	return stmt.all(...ids) as GmailMessage[];
 }
+
+/**
+ * DB의 gmail_messages에서 Gmail API message_id 가져오기
+ */
+export function getOriginalGmailMessageId(dbMessageId: number): string | null {
+	const db = require("../database").default;
+	const stmt = db.prepare("SELECT message_id FROM gmail_messages WHERE id = ?");
+	const result = stmt.get(dbMessageId) as { message_id: string } | null;
+	return result?.message_id || null;
+}

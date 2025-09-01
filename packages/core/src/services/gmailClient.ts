@@ -1,4 +1,5 @@
 import type { gmail_v1 } from "googleapis";
+import { createAttachment } from "../models/Attachment";
 import {
 	createGmailMessage,
 	findGmailMessageByMessageId,
@@ -8,6 +9,7 @@ import {
 	updateGmailMessageLabelsAndReadStatus,
 } from "../models/GmailMessage";
 import { readAttachments } from "../utils/fileReader";
+import { extractAllAttachments, saveAttachment } from "../utils/fileSaver";
 import {
 	extractEmail,
 	extractTextFromPayload,
@@ -284,6 +286,54 @@ export class GmailClient {
 
 					// DB에 저장
 					createGmailMessage(gmailMessage);
+
+					// 첨부파일이 있는 경우 다운로드 및 저장
+					if (hasAttachments && fullMessage.payload) {
+						try {
+							const attachments = extractAllAttachments(fullMessage.payload);
+							for (const attachment of attachments) {
+								try {
+									// 첨부파일 데이터 다운로드
+									const attachmentData =
+										await this.service.users.messages.attachments.get({
+											userId,
+											messageId: messageRef.id,
+											id: attachment.attachmentId,
+										});
+
+									if (attachmentData.data.data) {
+										// Base64 디코딩
+										const buffer = Buffer.from(
+											attachmentData.data.data,
+											"base64url",
+										);
+
+										// 파일 저장
+										saveAttachment(messageRef.id, attachment.filename, buffer);
+
+										// DB에 첨부파일 정보 저장
+										createAttachment({
+											message_id: messageRef.id,
+											file_name: attachment.filename,
+										});
+									}
+								} catch (attachmentError) {
+									console.error(
+										`첨부파일 다운로드 실패 (${messageRef.id}/${attachment.filename}):`,
+										attachmentError,
+									);
+									// 첨부파일 다운로드 실패는 메일 동기화를 중단하지 않음
+								}
+							}
+						} catch (error) {
+							console.error(
+								`첨부파일 처리 중 오류 발생 (${messageRef.id}):`,
+								error,
+							);
+							// 첨부파일 처리 실패는 메일 동기화를 중단하지 않음
+						}
+					}
+
 					synced++;
 				} catch (error) {
 					console.error(`메시지 ${messageRef.id} 동기화 중 오류 발생:`, error);

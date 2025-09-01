@@ -81,19 +81,17 @@ export function ReplyMailItem({ replyMail }: ReplyMailItemProps) {
 								</span>
 							</div>
 							<div className="flex flex-wrap gap-1">
-								{attachments.map(
-									(attachment: string, index: number) => (
-										<Badge
-											key={attachment || index}
-											variant="outline"
-											className="text-xs px-2 py-1 cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
-											onClick={() => handleDownloadAttachment(attachment)}
-											title={`${attachment || `첨부파일 ${index + 1}`} 다운로드`}
-										>
-											{attachment || `첨부파일 ${index + 1}`}
-										</Badge>
-									),
-								)}
+								{attachments.map((attachment: string, index: number) => (
+									<Badge
+										key={attachment || index}
+										variant="outline"
+										className="text-xs px-2 py-1 cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
+										onClick={() => handleDownloadAttachment(attachment)}
+										title={`${attachment || `첨부파일 ${index + 1}`} 다운로드`}
+									>
+										{attachment || `첨부파일 ${index + 1}`}
+									</Badge>
+								))}
 							</div>
 						</div>
 					)}

@@ -1,6 +1,5 @@
 "use client";
 
-import AIChatSidebar from "@/components/dashboard/AIChatSidebar";
 import Header from "@/components/dashboard/Header";
 import DashboardTab from "@/components/dashboard/tabs/DashboardTab";
 import GuidelinesTab from "@/components/dashboard/tabs/GuidelinesTab";
@@ -20,7 +19,7 @@ export default function AIEmailDashboard() {
 		aiGuidelines,
 	} = useDashboard();
 
-	const { isAutoReplyRunning, handleAutoReply } = useAutoReply();
+	const { isAutoReplyRunning } = useAutoReply();
 
 	return (
 		<div className="min-h-screen bg-background">

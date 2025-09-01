@@ -60,6 +60,18 @@ const initializeDatabase = () => {
       FOREIGN KEY (original_message_id) REFERENCES gmail_messages (message_id) ON DELETE CASCADE
     )
   `);
+
+	// 첨부파일 테이블
+	db.exec(`
+    CREATE TABLE IF NOT EXISTS attachments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      message_id TEXT NOT NULL,
+      file_name TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (message_id) REFERENCES gmail_messages (message_id) ON DELETE CASCADE
+    )
+  `);
 };
 
 // 데이터베이스 초기화 실행

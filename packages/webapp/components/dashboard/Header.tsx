@@ -1,6 +1,4 @@
-import { Bot, Settings } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Bot } from "lucide-react";
 
 export default function Header() {
 	return (
@@ -12,7 +10,7 @@ export default function Header() {
 							<Bot className="w-5 h-5 text-primary-foreground" />
 						</div>
 						<h1 className="text-2xl font-bold text-foreground">
-							금융 운영 자동화
+							금융기관 고객 정보 오퍼레이션 에이전트
 						</h1>
 					</div>
 				</div>
