@@ -6,7 +6,6 @@ import GuidelinesTab from "@/components/dashboard/tabs/GuidelinesTab";
 import InboxTab from "@/components/dashboard/tabs/InboxTab";
 import SentTab from "@/components/dashboard/tabs/SentTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAutoReply } from "@/hooks/useAutoReply";
 import { useDashboard } from "@/hooks/useDashboard";
 
 export default function AIEmailDashboard() {
@@ -18,8 +17,6 @@ export default function AIEmailDashboard() {
 		recentEmails,
 		aiGuidelines,
 	} = useDashboard();
-
-	const { isAutoReplyRunning } = useAutoReply();
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -45,12 +42,7 @@ export default function AIEmailDashboard() {
 						</TabsContent>
 
 						<TabsContent value="inbox">
-							<InboxTab
-								recentEmails={recentEmails}
-								isAutoReplyRunning={isAutoReplyRunning}
-								processedEmails={1}
-								totalUnreadEmails={13}
-							/>
+							<InboxTab recentEmails={recentEmails} />
 						</TabsContent>
 
 						<TabsContent value="sent">

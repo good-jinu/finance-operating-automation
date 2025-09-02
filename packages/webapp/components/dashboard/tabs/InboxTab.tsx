@@ -18,17 +18,9 @@ import type { Email } from "@/types/dashboard";
 
 interface InboxTabProps {
 	recentEmails: Email[];
-	isAutoReplyRunning: boolean;
-	processedEmails: number;
-	totalUnreadEmails: number;
 }
 
-export default function InboxTab({
-	recentEmails,
-	isAutoReplyRunning,
-	processedEmails,
-	totalUnreadEmails,
-}: InboxTabProps) {
+export default function InboxTab({ recentEmails }: InboxTabProps) {
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
@@ -54,11 +46,7 @@ export default function InboxTab({
 							</div>
 							<div>
 								<p className="font-medium">자동 처리 중</p>
-								<p className="text-sm text-muted-foreground">
-									{isAutoReplyRunning
-										? `${processedEmails}/${totalUnreadEmails}`
-										: "대기"}
-								</p>
+								<p className="text-sm text-muted-foreground">대기</p>
 							</div>
 						</div>
 					</CardContent>

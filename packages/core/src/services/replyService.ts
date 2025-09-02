@@ -1,4 +1,4 @@
-import { ClientPaymentSupportAgent } from "../agent";
+import { runRouterAgent } from "../agents";
 import { findGmailMessagesByIds } from "../models/GmailMessage";
 import {
 	countReplyMails,
@@ -30,7 +30,6 @@ export async function generateRepliesForMails(
 	progressCallback?: (progress: GenerateRepliesProgress) => void,
 ) {
 	try {
-		const writer = new ClientPaymentSupportAgent();
 		const messages = findGmailMessagesByIds(mailIds);
 
 		if (!messages || messages.length === 0) {
@@ -67,22 +66,36 @@ export async function generateRepliesForMails(
 
 			try {
 				console.log(
-					`답변 생성 중: ${message.subject || ""} (${i + 1}/${messages.length})`,
+					`답변 생성 중: ${message.subject || ""} (${i + 1}/${
+						messages.length
+					})`,
 				);
 
-				// AI가 답장 본문 작성
-				const replyResult = await writer.generateReply(
-					message.subject || "",
-					message.body || message.snippet || "",
-				);
+				// AI 에이전트를 통해 라우팅 및 응답 생성
+				const routerInput = `${message.subject || ""}\n\n${
+					message.body || message.snippet || ""
+				}`;
+				const inputFilePath = `${message.message_id}/document.pdf`;
+				const routerResult = await runRouterAgent(routerInput, inputFilePath);
+				const mailTitle =
+					routerResult.mail_title || `Re: ${message.subject || "No Subject"}`;
+				let replyBody = "";
+
+				// RouterAgent 출력 스키마에 따른 처리
+				if (routerResult.mail_body) {
+					replyBody = routerResult.mail_body;
+				} else {
+					replyBody =
+						"요청하신 내용을 처리하는 방법을 찾지 못했습니다. 다른 방식으로 문의해 주시기 바랍니다.";
+				}
 
 				// reply_mails 테이블에 답변 저장 (전송하지 않은 상태로)
 				if (message.id) {
 					createReplyMail({
 						original_message_id: message.message_id,
-						subject: `Re: ${message.subject || "No Subject"}`,
-						reply_body: replyResult.mail_body,
-						attachments: JSON.stringify(replyResult.attachments),
+						subject: mailTitle,
+						reply_body: replyBody,
+						attachments: JSON.stringify(routerResult.attachments ?? []),
 						is_sent: false,
 					});
 				}

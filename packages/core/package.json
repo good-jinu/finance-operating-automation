@@ -4,8 +4,7 @@
 	"description": "",
 	"main": "./src/index.ts",
 	"exports": {
-		".": "./src/index.ts",
-		"./agent": "./src/agent/index.ts",
+		"./agents": "./src/agents/index.ts",
 		"./services": "./src/services/index.ts",
 		"./models": "./src/models/index.ts"
 	},
@@ -21,15 +20,11 @@
 		"better-sqlite3": "^12.2.0",
 		"google-auth-library": "^10.3.0",
 		"googleapis": "^157.0.0",
-		"html-to-text": "^9.0.5"
+		"html-to-text": "^9.0.5",
+		"mammoth": "^1.10.0"
 	},
 	"devDependencies": {
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/html-to-text": "^9.0.4"
-	},
-	"engines": {
-		"node": ">=22.18.0",
-		"pnpm": "10.15.0"
-	},
-	"packageManager": "pnpm@10.15.0+sha512.486ebc259d3e999a4e8691ce03b5cac4a71cbeca39372a9b762cb500cfdf0873e2cb16abe3d951b1ee2cf012503f027b98b6584e4df22524e0c7450d9ec7aa7b"
+	}
 }
