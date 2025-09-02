@@ -26,9 +26,9 @@ export const RouterStateAnnotation = Annotation.Root({
 		reducer: (a, b) => a.concat(b),
 		default: () => [],
 	}),
-	input_filepath: Annotation<string>({
-		reducer: (x, y) => y ?? x,
-		default: () => "",
+	input_filepaths: Annotation<string[]>({
+		reducer: (x, y) => x.concat(y),
+		default: () => [],
 	}),
 
 	// 라우팅 관련
@@ -47,7 +47,7 @@ export const RouterStateAnnotation = Annotation.Root({
 		default: () => "",
 	}),
 	attachments: Annotation<string[]>({
-		reducer: (x, y) => [...(y || []), ...(x || [])],
+		reducer: (x, y) => x.concat(y),
 		default: () => [],
 	}),
 });

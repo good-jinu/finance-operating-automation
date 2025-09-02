@@ -8,9 +8,13 @@ const model = createChatModel();
 export const extractFileNode = async (
 	state: FileReaderState,
 ): Promise<Partial<FileReaderState>> => {
-	const loader = new DocxLoader(state.filePath);
+	const docs = [];
+	for (const filepath of state.filepaths) {
+		const loader = new DocxLoader(filepath);
 
-	const docs = await loader.load();
+		docs.push(await loader.load());
+	}
+
 	console.log(docs);
 
 	return {

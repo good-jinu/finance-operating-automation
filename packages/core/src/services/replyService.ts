@@ -1,4 +1,6 @@
+import path from "node:path";
 import { runRouterAgent } from "../agents";
+import { findAttachmentsByMessageId } from "../models/Attachment";
 import { findGmailMessagesByIds } from "../models/GmailMessage";
 import {
 	countReplyMails,
@@ -9,6 +11,7 @@ import {
 	findReplyMailsByStatus,
 	updateReplyMailSentStatus,
 } from "../models/ReplyMail";
+import { FILE_PATH } from "../utils/config";
 import { buildGmailService, getCredentials } from "./auth";
 import { GmailClient } from "./gmailClient";
 
@@ -75,8 +78,18 @@ export async function generateRepliesForMails(
 				const routerInput = `${message.subject || ""}\n\n${
 					message.body || message.snippet || ""
 				}`;
-				const inputFilePath = `${message.message_id}/document.pdf`;
-				const routerResult = await runRouterAgent(routerInput, inputFilePath);
+
+				// message_id에 매칭되는 첨부파일들 조회
+				const attachments = findAttachmentsByMessageId(message.message_id);
+				const inputFilePaths = attachments.map((attachment) =>
+					path.join(
+						process.cwd(),
+						FILE_PATH,
+						`${message.message_id}/${attachment.file_name}`,
+					),
+				);
+
+				const routerResult = await runRouterAgent(routerInput, inputFilePaths);
 				const mailTitle =
 					routerResult.mail_title || `Re: ${message.subject || "No Subject"}`;
 				let replyBody = "";

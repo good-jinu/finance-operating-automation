@@ -5,7 +5,10 @@ import {
 } from "@langchain/core/prompts";
 import type { SubAgentConfig } from "./schemas";
 
-export const createRouterPrompt = (subAgents: SubAgentConfig[], filepath?: string) => {
+export const createRouterPrompt = (
+	subAgents: SubAgentConfig[],
+	filepath?: string,
+) => {
 	const agentDescriptions = subAgents
 		.map((agent, index) => {
 			return `${index + 1}. **${agent.name}**: ${agent.description}`;
@@ -16,7 +19,7 @@ export const createRouterPrompt = (subAgents: SubAgentConfig[], filepath?: strin
 		.map((agent) => agent.name)
 		.concat(["__end__"]);
 
-	const additionalPrompt = filepath ? `파일을 읽어야 합니다.` : "";
+	const additionalPrompt = filepath ? `첨부된 파일을 먼저 읽어주세요.` : "";
 
 	return ChatPromptTemplate.fromMessages([
 		SystemMessagePromptTemplate.fromTemplate(

@@ -3,12 +3,12 @@ import { createRouterAgent } from "./workflow";
 
 export const runRouterAgent = async (
 	message: string,
-	inputFilePath?: string,
+	inputFilePaths?: string[],
 ) => {
 	const agent = createRouterAgent();
 	const result = await agent.invoke({
 		messages: [new HumanMessage(message)],
-		input_filepath: inputFilePath,
+		input_filepaths: inputFilePaths,
 	});
 	return result;
 };

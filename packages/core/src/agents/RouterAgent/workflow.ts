@@ -8,15 +8,13 @@ import { RouterStateAnnotation, type SubAgentConfig } from "./schemas";
 const SUB_AGENTS: SubAgentConfig[] = [
 	{
 		name: "GuideProvider",
-		description:
-			`사용자가 특정 작업을 수행하는 방법에 대한 가이드 또는 문서를 요청할 때 사용되는 워크플로입니다. 사용 가능한 주제는 "authority_change", "payment_account_change", "seal_sign_change"입니다.
+		description: `사용자가 특정 작업을 수행하는 방법에 대한 가이드 또는 문서를 요청할 때 사용되는 워크플로입니다. 사용 가능한 주제는 "authority_change", "payment_account_change", "seal_sign_change"입니다.
 예시:
 - 사용자 메시지: "결제 계좌를 어떻게 바꾸나요?"
-- 응답: {{"route": "GuideProvider", "extractedData": {{"topic": "payment_account_change"}}}}`,
+- 응답: {{"route": "GuideProvider"}}`,
 		workflow: createGuideProviderAgent(),
 		stateMapper: (state) => ({
 			messages: state.messages,
-			input_filepath: state.input_filepath,
 		}),
 		outputMapper: (state) => ({
 			mail_title: "",
@@ -26,19 +24,18 @@ const SUB_AGENTS: SubAgentConfig[] = [
 	},
 	{
 		name: "FileReader",
-		description:
-			`사용자가 파일 경로를 제공하고 해당 파일의 내용을 읽거나, 요약하거나, 처리해 달라고 요청할 때 사용되는 워크플로입니다.
+		description: `사용자가 파일 경로를 제공하고 해당 파일의 내용을 읽거나, 요약하거나, 처리해 달라고 요청할 때 사용되는 워크플로입니다.
 예시:
 - 사용자 메시지: "/path/to/file.txt 파일을 읽어주세요"
-- 응답: {{"route": "FileReader", "extractedData": {{"filePath": "/path/to/file.txt"}}}}`,
+- 응답: {{"route": "FileReader"}}`,
 		workflow: createFileReaderAgent(),
 		stateMapper: (state) => ({
 			messages: state.messages,
-			input_filepath: state.input_filepath,
+			filepaths: state.input_filepaths,
 		}),
 		outputMapper: (state) => ({
 			mail_title: "",
-			mail_body: state.content,
+			mail_body: state.description,
 			attachments: [],
 		}),
 	},

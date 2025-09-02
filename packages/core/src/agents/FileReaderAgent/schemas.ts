@@ -7,9 +7,9 @@ export const FileReaderStateAnnotation = Annotation.Root({
 		reducer: (a, b) => a.concat(b),
 		default: () => [],
 	}),
-	filePath: Annotation<string>({
-		reducer: (_, y) => y,
-		default: () => "",
+	filepaths: Annotation<string[]>({
+		reducer: (x, y) => x.concat(y),
+		default: () => [],
 	}),
 	content: Annotation<string>({
 		reducer: (_, y) => y,
