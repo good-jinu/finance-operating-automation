@@ -10,6 +10,9 @@ export const extractFileNode = async (
 ): Promise<Partial<FileReaderState>> => {
 	const docs = [];
 	for (const filepath of state.filepaths) {
+		if (!filepath) {
+			continue;
+		}
 		const loader = new DocxLoader(filepath);
 
 		docs.push(await loader.load());

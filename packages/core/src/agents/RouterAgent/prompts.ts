@@ -37,3 +37,29 @@ ${additionalPrompt}`,
 		HumanMessagePromptTemplate.fromTemplate("{message}"),
 	]);
 };
+
+export const MAIL_CREATION_PROMPT = ChatPromptTemplate.fromMessages([
+	SystemMessagePromptTemplate.fromTemplate(
+		`당신은 사용자의 요청과 에이전트 처리 결과를 바탕으로 이메일을 작성하는 전문가입니다.
+
+사용자의 원래 메시지와 에이전트가 처리한 결과를 참고하여 적절한 이메일 제목과 본문을 작성해주세요.
+
+요구사항:
+- 이메일 제목은 간결하고 명확하게 작성
+- 이메일 본문은 정중하고 전문적인 톤으로 작성
+- 첨부파일이 있는 경우 본문에서 언급
+- 한국어로 작성`,
+	),
+	HumanMessagePromptTemplate.fromTemplate(
+		`사용자 메시지: {user_message}
+
+에이전트 처리 결과:
+- 본문 내용: {agent_result}
+- 첨부파일: {attachments}
+
+위 정보를 바탕으로 적절한 이메일 제목과 본문을 작성해주세요.
+
+예시:
+{{ "title": "메일 제목", "body": "본문 내용을 작성해주세요." }}`,
+	),
+]);

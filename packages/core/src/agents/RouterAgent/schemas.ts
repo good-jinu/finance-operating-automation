@@ -13,11 +13,16 @@ export interface SubAgentConfig {
 	outputMapper?: (
 		// biome-ignore lint:suspicious/noExplicitAny
 		state: any,
-	) => Pick<RouterState, "mail_body" | "mail_title" | "attachments">;
+	) => Pick<RouterState, "description" | "attachments">;
 }
 
 export const RouteDecisionSchema = z.object({
 	route: z.string(),
+});
+
+export const MailWriterSchema = z.object({
+	title: z.string().describe("메일의 제목"),
+	body: z.string().describe("메일의 본문"),
 });
 
 export const RouterStateAnnotation = Annotation.Root({
@@ -31,8 +36,8 @@ export const RouterStateAnnotation = Annotation.Root({
 		default: () => [],
 	}),
 
-	// 라우팅 관련
-	route: Annotation<string>({
+	// 추론 state
+	description: Annotation<string>({
 		reducer: (x, y) => y ?? x,
 		default: () => "",
 	}),

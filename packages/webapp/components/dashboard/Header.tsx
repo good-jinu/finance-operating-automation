@@ -1,4 +1,5 @@
 import { Bot } from "lucide-react";
+import Link from "next/link";
 
 export default function Header() {
 	return (
@@ -13,6 +14,20 @@ export default function Header() {
 							금융기관 고객 정보 오퍼레이션 에이전트
 						</h1>
 					</div>
+					<nav className="flex items-center gap-4">
+						<Link
+							href="/"
+							className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+						>
+							채팅
+						</Link>
+						<Link
+							href="/mails"
+							className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+						>
+							메일 관리
+						</Link>
+					</nav>
 				</div>
 			</div>
 		</header>

@@ -1,7 +1,7 @@
 import { END, START, StateGraph } from "@langchain/langgraph";
 import { createFileReaderAgent } from "../FileReaderAgent/workflow";
 import { createGuideProviderAgent } from "../GuideProviderAgent/workflow";
-import { createRouteNode, createSubAgentNode } from "./nodes";
+import { createMailNode, createRouteNode, createSubAgentNode } from "./nodes";
 import { RouterStateAnnotation, type SubAgentConfig } from "./schemas";
 
 // 하위 에이전트 설정 - 여기서만 관리하면 됨
@@ -17,8 +17,7 @@ const SUB_AGENTS: SubAgentConfig[] = [
 			messages: state.messages,
 		}),
 		outputMapper: (state) => ({
-			mail_title: "",
-			mail_body: "",
+			description: state.description,
 			attachments: [state.attachment],
 		}),
 	},
@@ -34,8 +33,7 @@ const SUB_AGENTS: SubAgentConfig[] = [
 			filepaths: state.input_filepaths,
 		}),
 		outputMapper: (state) => ({
-			mail_title: "",
-			mail_body: state.description,
+			description: state.description,
 			attachments: [],
 		}),
 	},
@@ -51,7 +49,10 @@ export const createRouterAgent = (subAgents: SubAgentConfig[] = SUB_AGENTS) => {
 			// 'route_node'가 끝날 수 있는 모든 하위 에이전트 이름을 동적으로 지정
 			ends: subAgents.map((agent) => agent.name),
 		})
-		.addEdge(START, "route_node");
+		.addEdge(START, "route_node")
+		// 메일 작성 노드 추가
+		.addNode("create_mail", createMailNode)
+		.addEdge("create_mail", END);
 
 	// subAgents 배열을 순회하며 각 에이전트에 대한 노드와 엣지를 동적으로 추가
 	subAgents.reduce(
@@ -59,7 +60,8 @@ export const createRouterAgent = (subAgents: SubAgentConfig[] = SUB_AGENTS) => {
 			graph
 				// biome-ignore lint:suspicious/noExplicitAny
 				.addNode(agent.name as any, createSubAgentNode(agent))
-				.addEdge(agent.name, END),
+				// 각 서브 에이전트가 완료되면 메일 작성 노드로 이동
+				.addEdge(agent.name, "create_mail"),
 		workflow,
 	);
 

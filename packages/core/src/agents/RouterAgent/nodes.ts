@@ -1,7 +1,8 @@
 import { Command } from "@langchain/langgraph";
 import { createChatModel } from "../../llm";
-import { createRouterPrompt } from "./prompts";
+import { createRouterPrompt, MAIL_CREATION_PROMPT } from "./prompts";
 import {
+	MailWriterSchema,
 	RouteDecisionSchema,
 	type RouterState,
 	type SubAgentConfig,
@@ -23,15 +24,22 @@ export const createRouteNode = (subAgents: SubAgentConfig[]) => {
 
 		const message =
 			state.messages[state.messages.length - 1].content.toString();
-		const routerPrompt = createRouterPrompt(subAgents);
+		const routerPrompt = createRouterPrompt(
+			subAgents,
+			state.input_filepaths[0],
+		);
 
 		const result = await routerModel.invoke(
 			await routerPrompt.invoke({ message: message }),
 		);
 
+		const goto =
+			subAgents.find((agent) => agent.name === result.route)?.name ??
+			"create_mail";
+
 		// 라우터의 결정을 상태에 병합하기 위해 반환합니다.
 		return new Command({
-			goto: result.route,
+			goto,
 		});
 	};
 };
@@ -59,5 +67,30 @@ export const createSubAgentNode = (agentConfig: SubAgentConfig) => {
 					mail_body: "",
 					attachments: [],
 				};
+	};
+};
+
+// 메일 제목과 본문을 작성하는 노드
+export const createMailNode = async (
+	state: RouterState,
+): Promise<Partial<RouterState>> => {
+	const userMessage =
+		state.messages[state.messages.length - 1].content.toString();
+	const agentResult = state.mail_body || "처리 완료";
+	const attachments =
+		state.attachments.length > 0 ? state.attachments.join(", ") : "없음";
+	const mailModel = model.withStructuredOutput(MailWriterSchema);
+
+	const mailResponse = await mailModel.invoke(
+		await MAIL_CREATION_PROMPT.invoke({
+			user_message: userMessage,
+			agent_result: agentResult,
+			attachments: attachments,
+		}),
+	);
+
+	return {
+		mail_title: mailResponse.title,
+		mail_body: mailResponse.body,
 	};
 };

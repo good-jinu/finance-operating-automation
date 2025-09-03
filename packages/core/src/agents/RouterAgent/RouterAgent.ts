@@ -12,3 +12,17 @@ export const runRouterAgent = async (
 	});
 	return result;
 };
+
+export const streamRouterAgent = async (
+	message: string,
+	inputFilePaths: string[] = [],
+) => {
+	const agent = createRouterAgent();
+	return agent.stream(
+		{
+			messages: [new HumanMessage(message)],
+			input_filepaths: inputFilePaths,
+		},
+		{ streamMode: "updates" },
+	);
+};

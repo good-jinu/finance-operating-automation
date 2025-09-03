@@ -72,6 +72,17 @@ const initializeDatabase = () => {
       FOREIGN KEY (message_id) REFERENCES gmail_messages (message_id) ON DELETE CASCADE
     )
   `);
+
+	// 채팅 메시지 테이블
+	db.exec(`
+    CREATE TABLE IF NOT EXISTS chat_messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      session_id TEXT,
+      sender TEXT NOT NULL CHECK(sender IN ('user', 'ai')),
+      content TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
 };
 
 // 데이터베이스 초기화 실행

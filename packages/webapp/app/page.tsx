@@ -1,64 +1,15 @@
 "use client";
 
+import ChatInterface from "@/components/dashboard/ChatInterface";
 import Header from "@/components/dashboard/Header";
-import DashboardTab from "@/components/dashboard/tabs/DashboardTab";
-import GuidelinesTab from "@/components/dashboard/tabs/GuidelinesTab";
-import InboxTab from "@/components/dashboard/tabs/InboxTab";
-import SentTab from "@/components/dashboard/tabs/SentTab";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useDashboard } from "@/hooks/useDashboard";
 
-export default function AIEmailDashboard() {
-	const {
-		activeTab,
-		setActiveTab,
-		guideline,
-		setGuideline,
-		recentEmails,
-		aiGuidelines,
-	} = useDashboard();
-
+export default function ChatPage() {
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="flex flex-col h-screen bg-background">
 			<Header />
-
-			<div className="container mx-auto px-4 py-6">
-				{/* Main Content */}
-				<div className="lg:col-span-3">
-					<Tabs
-						value={activeTab}
-						onValueChange={setActiveTab}
-						className="space-y-6"
-					>
-						<TabsList className="grid w-full grid-cols-4">
-							<TabsTrigger value="dashboard">대시보드</TabsTrigger>
-							<TabsTrigger value="inbox">고객 요청</TabsTrigger>
-							<TabsTrigger value="sent">처리 완료</TabsTrigger>
-							<TabsTrigger value="guidelines">업무 규칙</TabsTrigger>
-						</TabsList>
-
-						<TabsContent value="dashboard">
-							<DashboardTab recentEmails={recentEmails} />
-						</TabsContent>
-
-						<TabsContent value="inbox">
-							<InboxTab recentEmails={recentEmails} />
-						</TabsContent>
-
-						<TabsContent value="sent">
-							<SentTab recentEmails={recentEmails} />
-						</TabsContent>
-
-						<TabsContent value="guidelines">
-							<GuidelinesTab
-								aiGuidelines={aiGuidelines}
-								guideline={guideline}
-								onGuidelineChange={setGuideline}
-							/>
-						</TabsContent>
-					</Tabs>
-				</div>
-			</div>
+			<main className="flex-1 overflow-hidden">
+				<ChatInterface />
+			</main>
 		</div>
 	);
 }

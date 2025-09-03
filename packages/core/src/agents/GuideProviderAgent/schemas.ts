@@ -21,6 +21,10 @@ export const GuideProviderStateAnnotation = Annotation.Root({
 		reducer: (_, y) => y,
 		default: () => "",
 	}),
+	description: Annotation<string>({
+		reducer: (x, y) => y ?? x,
+		default: () => "",
+	}),
 	attachment: Annotation<string>({
 		reducer: (_, y) => y,
 		default: () => "",
