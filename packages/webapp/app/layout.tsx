@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import type React from "react";
 import "./globals.css";
+import Header from "@/components/dashboard/Header";
 import QueryProvider from "@/components/provider/QueryProvider";
 
 const montserrat = Montserrat({
@@ -28,7 +29,12 @@ export default function RootLayout({
 			<body
 				className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${montserrat.variable}`}
 			>
-				<QueryProvider>{children}</QueryProvider>
+				<QueryProvider>
+					<div className="flex flex-col h-screen bg-background">
+						<Header />
+						{children}
+					</div>
+				</QueryProvider>
 			</body>
 		</html>
 	);

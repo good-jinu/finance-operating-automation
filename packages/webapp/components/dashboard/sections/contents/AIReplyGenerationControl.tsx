@@ -1,6 +1,6 @@
 "use client";
 
-import { Play, RefreshCw, Settings } from "lucide-react";
+import { Play, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useGenerateReplies } from "@/hooks/useReplyMails";
@@ -69,9 +69,6 @@ export function AIReplyGenerationControl({
 						{generateRepliesMutation.isPending
 							? "생성 중..."
 							: `선택 답변 생성 (${selectedMailIds.length})`}
-					</Button>
-					<Button variant="outline" size="sm">
-						<Settings className="w-4 h-4" />
 					</Button>
 				</div>
 			</div>

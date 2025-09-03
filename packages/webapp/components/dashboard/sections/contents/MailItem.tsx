@@ -1,24 +1,35 @@
 "use client";
 
-import { Clock, Download, Paperclip } from "lucide-react";
+import type { ReplyMailWithOriginal } from "@finance-operating-automation/core/models";
+import {
+	ChevronDown,
+	ChevronRight,
+	Clock,
+	Download,
+	Paperclip,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAttachments } from "@/hooks/useAttachments";
 import type { GmailMessage } from "@/types";
+import { ReplyMailItem } from "./ReplyMailItem";
 
 interface MailItemProps {
 	mail: GmailMessage;
 	isSelected?: boolean;
 	onSelectChange?: (selected: boolean) => void;
+	replyMails?: ReplyMailWithOriginal[];
 }
 
 export function MailItem({
 	mail,
 	isSelected = false,
 	onSelectChange,
+	replyMails = [],
 }: MailItemProps) {
 	const [showAttachments, setShowAttachments] = useState(false);
+	const [showReplies, setShowReplies] = useState(false);
 	const {
 		attachments,
 		isLoading: isLoadingAttachments,
@@ -53,6 +64,11 @@ export function MailItem({
 		downloadAttachment(mail.message_id, fileName);
 	};
 
+	const handleRepliesToggle = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		setShowReplies(!showReplies);
+	};
+
 	useEffect(() => {
 		if (mail.has_attachments && showAttachments && attachments.length === 0) {
 			loadAttachments(mail.message_id);
@@ -76,13 +92,28 @@ export function MailItem({
 			<Checkbox
 				checked={isSelected}
 				onCheckedChange={(checked) => onSelectChange?.(!!checked)}
-				className="mt-1"
+				className="mt-1 border border-neutral-500"
 			/>
 			<div className="flex-1 min-w-0">
 				<div className="flex items-center gap-2 mb-1">
 					<p className="text-sm font-medium truncate">{mail.sender}</p>
 					{!!mail.is_unread && (
 						<div className="w-2 h-2 bg-primary rounded-full" />
+					)}
+					{replyMails.length > 0 && (
+						<button
+							type="button"
+							onClick={handleRepliesToggle}
+							className="flex items-center gap-1 px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors"
+							title={`답변 메일 ${showReplies ? "숨기기" : "보기"} (${replyMails.length}개)`}
+						>
+							{showReplies ? (
+								<ChevronDown className="w-3 h-3" />
+							) : (
+								<ChevronRight className="w-3 h-3" />
+							)}
+							답변 {replyMails.length}개
+						</button>
 					)}
 					{!!mail.has_attachments && (
 						<button
@@ -150,6 +181,15 @@ export function MailItem({
 								))}
 							</div>
 						)}
+					</div>
+				)}
+
+				{/* Reply Mails Section */}
+				{showReplies && replyMails.length > 0 && (
+					<div className="mt-3 pl-4 border-l-2 border-green-200 space-y-2">
+						{replyMails.map((replyMail) => (
+							<ReplyMailItem key={replyMail.id} replyMail={replyMail} />
+						))}
 					</div>
 				)}
 			</div>
