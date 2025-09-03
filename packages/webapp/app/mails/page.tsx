@@ -1,6 +1,7 @@
 "use client";
 
 import DashboardTab from "@/components/dashboard/tabs/DashboardTab";
+import DatabaseTab from "@/components/dashboard/tabs/DatabaseTab";
 import GuidelinesTab from "@/components/dashboard/tabs/GuidelinesTab";
 import InboxTab from "@/components/dashboard/tabs/InboxTab";
 import SentTab from "@/components/dashboard/tabs/SentTab";
@@ -26,11 +27,12 @@ export default function MailsPage() {
 					onValueChange={setActiveTab}
 					className="space-y-6"
 				>
-					<TabsList className="grid w-full grid-cols-4">
+					<TabsList className="grid w-full grid-cols-5">
 						<TabsTrigger value="dashboard">대시보드</TabsTrigger>
 						<TabsTrigger value="inbox">고객 요청</TabsTrigger>
 						<TabsTrigger value="sent">처리 완료</TabsTrigger>
 						<TabsTrigger value="guidelines">업무 규칙</TabsTrigger>
+						<TabsTrigger value="database">데이터베이스</TabsTrigger>
 					</TabsList>
 
 					<TabsContent value="dashboard">
@@ -51,6 +53,10 @@ export default function MailsPage() {
 							guideline={guideline}
 							onGuidelineChange={setGuideline}
 						/>
+					</TabsContent>
+
+					<TabsContent value="database">
+						<DatabaseTab />
 					</TabsContent>
 				</Tabs>
 			</div>

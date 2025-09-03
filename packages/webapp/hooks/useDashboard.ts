@@ -94,6 +94,9 @@ export function useDashboard() {
 				case "guidelines":
 					setActiveTab("guidelines");
 					break;
+				case "database":
+					setActiveTab("database");
+					break;
 			}
 		},
 		guideline,

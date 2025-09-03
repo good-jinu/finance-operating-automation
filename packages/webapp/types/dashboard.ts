@@ -41,4 +41,9 @@ export interface AutoReplyProgress {
 	};
 }
 
-export type TabValue = "dashboard" | "inbox" | "sent" | "guidelines";
+export type TabValue =
+	| "dashboard"
+	| "inbox"
+	| "sent"
+	| "guidelines"
+	| "database";
