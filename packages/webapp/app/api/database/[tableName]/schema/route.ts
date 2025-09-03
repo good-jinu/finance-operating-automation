@@ -1,0 +1,19 @@
+import { getTableSchema } from "@finance-operating-automation/core/services";
+import { type NextRequest, NextResponse } from "next/server";
+
+export async function GET(
+	_req: NextRequest,
+	{ params }: { params: { tableName: string } },
+) {
+	try {
+		const tableName = params.tableName;
+		const schema = await getTableSchema(tableName);
+		return NextResponse.json(schema);
+	} catch (error) {
+		console.error(
+			`Error fetching schema for table ${params.tableName}:`,
+			error,
+		);
+		return new NextResponse("Internal Server Error", { status: 500 });
+	}
+}

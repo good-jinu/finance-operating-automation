@@ -15,35 +15,10 @@ export interface Email {
 	isAI: boolean;
 }
 
-export interface AutoReplyLog {
-	id: string;
-	subject: string;
-	sender: string;
-	status: "success" | "error" | "processing";
-	timestamp: string;
-	message?: string;
-}
-
 export interface AIGuideline {
 	id: number;
 	rule: string;
 	active: boolean;
 }
 
-export interface AutoReplyProgress {
-	totalEmails: number;
-	processedEmails: number;
-	status: "running" | "completed" | "error";
-	currentEmail?: {
-		subject: string;
-		sender: string;
-		status: "success" | "error" | "processing";
-	};
-}
-
-export type TabValue =
-	| "dashboard"
-	| "inbox"
-	| "sent"
-	| "guidelines"
-	| "database";
+export type TabValue = "dashboard" | "database";

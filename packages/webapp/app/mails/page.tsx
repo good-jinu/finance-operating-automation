@@ -2,21 +2,11 @@
 
 import DashboardTab from "@/components/dashboard/tabs/DashboardTab";
 import DatabaseTab from "@/components/dashboard/tabs/DatabaseTab";
-import GuidelinesTab from "@/components/dashboard/tabs/GuidelinesTab";
-import InboxTab from "@/components/dashboard/tabs/InboxTab";
-import SentTab from "@/components/dashboard/tabs/SentTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDashboard } from "@/hooks/useDashboard";
 
 export default function MailsPage() {
-	const {
-		activeTab,
-		setActiveTab,
-		guideline,
-		setGuideline,
-		recentEmails,
-		aiGuidelines,
-	} = useDashboard();
+	const { activeTab, setActiveTab } = useDashboard();
 
 	return (
 		<div className="container mx-auto px-4 py-6">
@@ -29,30 +19,11 @@ export default function MailsPage() {
 				>
 					<TabsList className="grid w-full grid-cols-5">
 						<TabsTrigger value="dashboard">대시보드</TabsTrigger>
-						<TabsTrigger value="inbox">고객 요청</TabsTrigger>
-						<TabsTrigger value="sent">처리 완료</TabsTrigger>
-						<TabsTrigger value="guidelines">업무 규칙</TabsTrigger>
 						<TabsTrigger value="database">데이터베이스</TabsTrigger>
 					</TabsList>
 
 					<TabsContent value="dashboard">
-						<DashboardTab recentEmails={recentEmails} />
-					</TabsContent>
-
-					<TabsContent value="inbox">
-						<InboxTab recentEmails={recentEmails} />
-					</TabsContent>
-
-					<TabsContent value="sent">
-						<SentTab recentEmails={recentEmails} />
-					</TabsContent>
-
-					<TabsContent value="guidelines">
-						<GuidelinesTab
-							aiGuidelines={aiGuidelines}
-							guideline={guideline}
-							onGuidelineChange={setGuideline}
-						/>
+						<DashboardTab />
 					</TabsContent>
 
 					<TabsContent value="database">

@@ -1,3 +1,4 @@
+import db from "../database";
 import {
 	createAuthorizedPerson,
 	deleteAuthorizedPerson,
@@ -115,4 +116,9 @@ export async function deleteTableRow(
 		default:
 			throw new Error(`Invalid table name for deletion: ${tableName}`);
 	}
+}
+
+export function getTableSchema(tableName: string): Promise<any[]> {
+	const stmt = db.prepare(`PRAGMA table_info(${tableName})`);
+	return stmt.all();
 }

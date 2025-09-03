@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DatabaseForm } from "@/components/ui/DatabaseForm";
 import { DataTable } from "@/components/ui/DataTable";
+import { Toaster, toast } from "@/components/ui/sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function DatabaseTab() {
@@ -24,6 +25,7 @@ export default function DatabaseTab() {
 		} catch (error) {
 			console.error(`Failed to fetch data for table ${activeTable}:`, error);
 			setTableData([]);
+			toast.error("Failed to fetch data.");
 		} finally {
 			setIsLoading(false);
 		}
@@ -40,6 +42,7 @@ export default function DatabaseTab() {
 				}
 			} catch (error) {
 				console.error("Failed to fetch table names:", error);
+				toast.error("Failed to fetch table names.");
 			}
 		}
 		fetchTableNames();
@@ -73,13 +76,18 @@ export default function DatabaseTab() {
 			});
 
 			if (!response.ok) {
-				throw new Error("Failed to save data");
+				const errorData = await response.text();
+				throw new Error(errorData || "Failed to save data");
 			}
 
+			toast.success(
+				`Successfully ${editingRow ? "updated" : "created"} record.`,
+			);
 			handleCloseForm();
 			fetchTableData(); // Refresh data
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Error saving data:", error);
+			toast.error(`Error saving data: ${error.message}`);
 		}
 	};
 
@@ -91,52 +99,58 @@ export default function DatabaseTab() {
 				});
 
 				if (!response.ok) {
-					throw new Error("Failed to delete data");
+					const errorData = await response.text();
+					throw new Error(errorData || "Failed to delete data");
 				}
 
+				toast.success("Successfully deleted record.");
 				fetchTableData(); // Refresh data
-			} catch (error) {
+			} catch (error: any) {
 				console.error("Error deleting data:", error);
+				toast.error(`Error deleting data: ${error.message}`);
 			}
 		}
 	};
 
 	return (
-		<Tabs
-			value={activeTable}
-			onValueChange={setActiveTable}
-			className="space-y-4"
-		>
-			<TabsList>
+		<>
+			<Toaster />
+			<Tabs
+				value={activeTable}
+				onValueChange={setActiveTable}
+				className="space-y-4"
+			>
+				<TabsList>
+					{tableNames.map((name) => (
+						<TabsTrigger key={name} value={name}>
+							{name}
+						</TabsTrigger>
+					))}
+				</TabsList>
 				{tableNames.map((name) => (
-					<TabsTrigger key={name} value={name}>
-						{name}
-					</TabsTrigger>
+					<TabsContent key={name} value={name}>
+						<div className="flex justify-end mb-4">
+							<Button onClick={() => handleOpenForm(null)}>Add New</Button>
+						</div>
+						{isLoading ? (
+							<p>Loading...</p>
+						) : (
+							<DataTable
+								data={tableData}
+								onEdit={handleOpenForm}
+								onDelete={handleDeleteRow}
+							/>
+						)}
+					</TabsContent>
 				))}
-			</TabsList>
-			{tableNames.map((name) => (
-				<TabsContent key={name} value={name}>
-					<div className="flex justify-end mb-4">
-						<Button onClick={() => handleOpenForm(null)}>Add New</Button>
-					</div>
-					{isLoading ? (
-						<p>Loading...</p>
-					) : (
-						<DataTable
-							data={tableData}
-							onEdit={handleOpenForm}
-							onDelete={handleDeleteRow}
-						/>
-					)}
-				</TabsContent>
-			))}
-			<DatabaseForm
-				isOpen={isFormOpen}
-				onClose={handleCloseForm}
-				onSubmit={handleSubmitForm}
-				initialData={editingRow}
-				tableName={activeTable}
-			/>
-		</Tabs>
+				<DatabaseForm
+					isOpen={isFormOpen}
+					onClose={handleCloseForm}
+					onSubmit={handleSubmitForm}
+					initialData={editingRow}
+					tableName={activeTable}
+				/>
+			</Tabs>
+		</>
 	);
 }
