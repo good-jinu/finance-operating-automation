@@ -8,7 +8,7 @@ export async function GET(
 	_req: NextRequest,
 	{ params }: { params: Promise<{ tableName: string }> },
 ) {
-	const {tableName} = await params;
+	const { tableName } = await params;
 	try {
 		const data = await getTableData(tableName);
 		return NextResponse.json(data);
@@ -22,7 +22,7 @@ export async function POST(
 	req: NextRequest,
 	{ params }: { params: Promise<{ tableName: string }> },
 ) {
-	const {tableName} = await params;
+	const { tableName } = await params;
 	try {
 		const body = await req.json();
 		const newData = await createTableRow(tableName, body);

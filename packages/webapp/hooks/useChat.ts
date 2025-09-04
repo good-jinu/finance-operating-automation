@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { io, type Socket } from "socket.io-client";
+import { socket } from "@/lib/socket";
 import { type Message, useChatStore } from "@/store/chat";
 
 export const useChat = (sessionId = "session-123") => {
@@ -11,27 +11,30 @@ export const useChat = (sessionId = "session-123") => {
 		setIsStreaming,
 	} = useChatStore();
 	const [input, setInput] = useState("");
-	const socketRef = useRef<Socket | null>(null);
+	const socketRef = useRef(socket);
 
 	useEffect(() => {
-		const newSocket = io("http://localhost:3001", {
-			query: { sessionId },
-			transports: ["websocket"],
-		});
-		socketRef.current = newSocket;
+		// Configure socket connection
+		socket.io.opts.query = { sessionId };
+		socket.io.opts.transports = ["websocket"];
 
-		newSocket.on("connect", () => {
+		// Connect if not already connected
+		if (!socket.connected) {
+			socket.connect();
+		}
+
+		socket.on("connect", () => {
 			console.log("Socket.IO connected");
 		});
 
-		newSocket.on("history", (history: Message[]) => {
+		socket.on("history", (history: Message[]) => {
 			setHistory(history);
 		});
 
 		let currentAiMessageId: string | null = null;
 		let isNewMessage = true;
 
-		newSocket.on("message", (message: { content: string; sender: "ai" }) => {
+		socket.on("message", (message: { content: string; sender: "ai" }) => {
 			if (isNewMessage) {
 				currentAiMessageId = Date.now().toString();
 				addMessage({ ...message, id: currentAiMessageId });
@@ -42,18 +45,22 @@ export const useChat = (sessionId = "session-123") => {
 			}
 		});
 
-		newSocket.on("streamEnd", () => {
+		socket.on("streamEnd", () => {
 			setIsStreaming(false);
 			currentAiMessageId = null;
 			isNewMessage = true;
 		});
 
-		newSocket.on("disconnect", () => {
+		socket.on("disconnect", () => {
 			console.log("Socket.IO disconnected");
 		});
 
 		return () => {
-			newSocket.disconnect();
+			socket.off("connect");
+			socket.off("history");
+			socket.off("message");
+			socket.off("streamEnd");
+			socket.off("disconnect");
 		};
 	}, [sessionId, setHistory, addMessage, appendLastMessage, setIsStreaming]);
 
@@ -65,8 +72,7 @@ export const useChat = (sessionId = "session-123") => {
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		const socket = socketRef.current;
-		if (!input.trim() || !socket) return;
+		if (!input.trim() || !socket.connected) return;
 
 		const userMessage: Omit<Message, "id"> = {
 			sender: "user",

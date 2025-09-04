@@ -1,4 +1,5 @@
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
+import { createChatModel } from "../../llm";
 import {
 	findAuthorizedPersonById,
 	updateAuthorizedPerson,
@@ -13,7 +14,6 @@ import {
 } from "../../models/PaymentAccount";
 import { CUSTOMER_DATABASE_AGENT_PROMPT } from "./prompts";
 import type { CustomerDatabaseState } from "./schemas";
-import {createChatModel} from "../../llm";
 
 const model = createChatModel();
 

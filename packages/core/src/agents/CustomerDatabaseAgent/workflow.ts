@@ -1,8 +1,6 @@
 import { END, StateGraph } from "@langchain/langgraph";
 import { analyzeRequest, executeUpdate } from "./nodes";
-import {
-	CustomerDatabaseStateAnnotation,
-} from "./schemas";
+import { CustomerDatabaseStateAnnotation } from "./schemas";
 
 export const createCustomerDatabaseAgent = () => {
 	const workflow = new StateGraph(CustomerDatabaseStateAnnotation)

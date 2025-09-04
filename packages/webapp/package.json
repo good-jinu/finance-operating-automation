@@ -3,10 +3,10 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "tsx server.ts",
+		"dev": "npx tsx server.ts",
 		"prebuild": "node scripts/ensure-directories.js",
 		"build": "next build",
-		"start": "next start",
+		"start": "NODE_ENV=production npx tsx server.ts",
 		"lint": "next lint"
 	},
 	"dependencies": {
