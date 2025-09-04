@@ -32,6 +32,16 @@ export function findOfficialSealById(id: number): OfficialSeal | null {
 	return stmt.get(id) as OfficialSeal | null;
 }
 
+export function findOfficialSealsByCompanyId(company_id: number): OfficialSeal[] {
+	const stmt = db.prepare("SELECT * FROM official_seal WHERE company_id = ? ORDER BY created_at DESC");
+	return stmt.all(company_id) as OfficialSeal[];
+}
+
+export function findLatestOfficialSealByCompanyId(company_id: number): OfficialSeal | null {
+	const stmt = db.prepare("SELECT * FROM official_seal WHERE company_id = ? ORDER BY created_at DESC LIMIT 1");
+	return stmt.get(company_id) as OfficialSeal | null;
+}
+
 export function findAllOfficialSeals(): OfficialSeal[] {
 	const stmt = db.prepare(
 		"SELECT * FROM official_seal ORDER BY created_at DESC",

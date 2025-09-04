@@ -39,6 +39,41 @@ export function findPaymentAccountById(id: number): PaymentAccount | null {
 	return stmt.get(id) as PaymentAccount | null;
 }
 
+export function findPaymentAccountByAccountNumber(account_number: string, company_id?: number): PaymentAccount | null {
+	if (company_id) {
+		const stmt = db.prepare("SELECT * FROM payment_account WHERE account_number = ? AND company_id = ?");
+		return stmt.get(account_number, company_id) as PaymentAccount | null;
+	} else {
+		const stmt = db.prepare("SELECT * FROM payment_account WHERE account_number = ?");
+		return stmt.get(account_number) as PaymentAccount | null;
+	}
+}
+
+export function findPaymentAccountByAccountHolder(account_holder: string, company_id?: number): PaymentAccount | null {
+	if (company_id) {
+		const stmt = db.prepare("SELECT * FROM payment_account WHERE account_holder = ? AND company_id = ?");
+		return stmt.get(account_holder, company_id) as PaymentAccount | null;
+	} else {
+		const stmt = db.prepare("SELECT * FROM payment_account WHERE account_holder = ?");
+		return stmt.get(account_holder) as PaymentAccount | null;
+	}
+}
+
+export function searchPaymentAccountsByBankName(bank_name: string, company_id?: number): PaymentAccount[] {
+	if (company_id) {
+		const stmt = db.prepare("SELECT * FROM payment_account WHERE bank_name LIKE ? AND company_id = ? ORDER BY created_at DESC");
+		return stmt.all(`%${bank_name}%`, company_id) as PaymentAccount[];
+	} else {
+		const stmt = db.prepare("SELECT * FROM payment_account WHERE bank_name LIKE ? ORDER BY created_at DESC");
+		return stmt.all(`%${bank_name}%`) as PaymentAccount[];
+	}
+}
+
+export function findPaymentAccountsByCompanyId(company_id: number): PaymentAccount[] {
+	const stmt = db.prepare("SELECT * FROM payment_account WHERE company_id = ? ORDER BY created_at DESC");
+	return stmt.all(company_id) as PaymentAccount[];
+}
+
 export function findAllPaymentAccounts(): PaymentAccount[] {
 	const stmt = db.prepare(
 		"SELECT * FROM payment_account ORDER BY created_at DESC",

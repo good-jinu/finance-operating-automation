@@ -41,6 +41,31 @@ export function findAuthorizedPersonById(id: number): AuthorizedPerson | null {
 	return stmt.get(id) as AuthorizedPerson | null;
 }
 
+export function findAuthorizedPersonByName(name: string, company_id?: number): AuthorizedPerson | null {
+	if (company_id) {
+		const stmt = db.prepare("SELECT * FROM authorized_person WHERE name = ? AND company_id = ?");
+		return stmt.get(name, company_id) as AuthorizedPerson | null;
+	} else {
+		const stmt = db.prepare("SELECT * FROM authorized_person WHERE name = ?");
+		return stmt.get(name) as AuthorizedPerson | null;
+	}
+}
+
+export function searchAuthorizedPersonsByName(name: string, company_id?: number): AuthorizedPerson[] {
+	if (company_id) {
+		const stmt = db.prepare("SELECT * FROM authorized_person WHERE name LIKE ? AND company_id = ? ORDER BY created_at DESC");
+		return stmt.all(`%${name}%`, company_id) as AuthorizedPerson[];
+	} else {
+		const stmt = db.prepare("SELECT * FROM authorized_person WHERE name LIKE ? ORDER BY created_at DESC");
+		return stmt.all(`%${name}%`) as AuthorizedPerson[];
+	}
+}
+
+export function findAuthorizedPersonsByCompanyId(company_id: number): AuthorizedPerson[] {
+	const stmt = db.prepare("SELECT * FROM authorized_person WHERE company_id = ? ORDER BY created_at DESC");
+	return stmt.all(company_id) as AuthorizedPerson[];
+}
+
 export function findAllAuthorizedPersons(): AuthorizedPerson[] {
 	const stmt = db.prepare(
 		"SELECT * FROM authorized_person ORDER BY created_at DESC",

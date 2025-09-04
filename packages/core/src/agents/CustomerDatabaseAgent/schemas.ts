@@ -39,6 +39,10 @@ export const CustomerDatabaseStateAnnotation = Annotation.Root({
 		reducer: (_, y) => y,
 		default: () => null,
 	}),
+	search_criteria: Annotation<any>({
+		reducer: (_, y) => y,
+		default: () => null,
+	}),
 	description: Annotation<string>({
 		reducer: (x, y) => y ?? x,
 		default: () => "",
