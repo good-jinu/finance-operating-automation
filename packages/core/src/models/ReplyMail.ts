@@ -99,6 +99,31 @@ export function updateReplyMailSentStatus(
 	return result.changes > 0;
 }
 
+export function updateReplyMailContent(
+	id: number,
+	subject: string,
+	reply_body: string,
+): boolean {
+	const stmt = db.prepare(`
+		UPDATE reply_mails 
+		SET subject = ?, reply_body = ?, updated_at = CURRENT_TIMESTAMP
+		WHERE id = ? AND is_sent = 0
+	`);
+
+	const result = stmt.run(subject, reply_body, id);
+	return result.changes > 0;
+}
+
+export function deleteReplyMail(id: number): boolean {
+	const stmt = db.prepare(`
+		DELETE FROM reply_mails 
+		WHERE id = ? AND is_sent = 0
+	`);
+
+	const result = stmt.run(id);
+	return result.changes > 0;
+}
+
 export function countReplyMails(): number {
 	const stmt = db.prepare("SELECT COUNT(*) as count FROM reply_mails");
 	const result = stmt.get() as { count: number };

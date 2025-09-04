@@ -17,7 +17,7 @@ export default function MailsPage() {
 					onValueChange={setActiveTab}
 					className="space-y-6"
 				>
-					<TabsList className="grid w-full grid-cols-5">
+					<TabsList className="grid w-full grid-cols-2">
 						<TabsTrigger value="dashboard">대시보드</TabsTrigger>
 						<TabsTrigger value="database">데이터베이스</TabsTrigger>
 					</TabsList>

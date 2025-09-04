@@ -6,9 +6,11 @@ import {
 	countReplyMails,
 	countUnsentReplyMails,
 	createReplyMail,
+	deleteReplyMail,
 	findAllReplyMails,
 	findReplyMailById,
 	findReplyMailsByStatus,
+	updateReplyMailContent,
 	updateReplyMailSentStatus,
 } from "../models/ReplyMail";
 import { FILE_PATH } from "../utils/config";
@@ -260,4 +262,57 @@ export function getUnsentReplyMailsCount(): number {
  */
 export function getReplyMailById(id: number) {
 	return findReplyMailById(id);
+}
+
+/**
+ * 답변 메일 내용 업데이트 (미전송 메일만)
+ */
+export function updateReplyMail(
+	id: number,
+	subject: string,
+	reply_body: string,
+): boolean {
+	try {
+		// 먼저 해당 메일이 존재하고 미전송 상태인지 확인
+		const existingMail = findReplyMailById(id);
+		if (!existingMail) {
+			throw new Error("Reply mail not found");
+		}
+
+		if (existingMail.is_sent) {
+			throw new Error("Cannot update already sent mail");
+		}
+
+		// 빈 값 체크
+		if (!subject.trim() || !reply_body.trim()) {
+			throw new Error("Subject and reply body cannot be empty");
+		}
+
+		return updateReplyMailContent(id, subject.trim(), reply_body.trim());
+	} catch (error) {
+		console.error("Error updating reply mail:", error);
+		throw error;
+	}
+}
+
+/**
+ * 답변 메일 삭제 (미전송 메일만)
+ */
+export function removeReplyMail(id: number): boolean {
+	try {
+		// 먼저 해당 메일이 존재하고 미전송 상태인지 확인
+		const existingMail = findReplyMailById(id);
+		if (!existingMail) {
+			throw new Error("Reply mail not found");
+		}
+
+		if (existingMail.is_sent) {
+			throw new Error("Cannot delete already sent mail");
+		}
+
+		return deleteReplyMail(id);
+	} catch (error) {
+		console.error("Error deleting reply mail:", error);
+		throw error;
+	}
 }
