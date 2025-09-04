@@ -6,7 +6,7 @@ import { htmlToText } from "html-to-text";
  */
 export function extractEmail(text: string): string | null {
 	const matches = text.match(
-		/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/g,
+		/[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9._-]+/g,
 	);
 	return matches ? matches[0] : null;
 }
@@ -67,7 +67,17 @@ function convertHtmlToText(html: string): string {
 	if (!html) {
 		return "";
 	}
-	return htmlToText(html, { wordwrap: false });
+	return htmlToText(html, {
+		wordwrap: false,
+		selectors: [
+			{ selector: "h1", options: { uppercase: false } },
+			{ selector: "h2", options: { uppercase: false } },
+			{ selector: "h3", options: { uppercase: false } },
+			{ selector: "h4", options: { uppercase: false } },
+			{ selector: "h5", options: { uppercase: false } },
+			{ selector: "h6", options: { uppercase: false } },
+		],
+	});
 }
 
 /**
