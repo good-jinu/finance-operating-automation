@@ -10,3 +10,6 @@ dist/
 # auth
 credentials.json
 token.json
+
+# test coverage
+coverage/
