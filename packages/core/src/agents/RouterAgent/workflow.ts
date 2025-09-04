@@ -1,4 +1,5 @@
 import { END, START, StateGraph } from "@langchain/langgraph";
+import { createCustomerDatabaseAgent } from "../CustomerDatabaseAgent/workflow";
 import { createFileReaderAgent } from "../FileReaderAgent/workflow";
 import { createGuideProviderAgent } from "../GuideProviderAgent/workflow";
 import { createMailNode, createRouteNode, createSubAgentNode } from "./nodes";
@@ -22,11 +23,11 @@ const SUB_AGENTS: SubAgentConfig[] = [
 		}),
 	},
 	{
-		name: "FileReader",
-		description: `사용자가 파일 경로를 제공하고 해당 파일의 내용을 읽거나, 요약하거나, 처리해 달라고 요청할 때 사용되는 워크플로입니다.
+		name: "FileReaderToDatabase",
+		description: `사용자가 파일 경로를 제공하고 해당 파일의 내용을 읽어서 고객 데이터베이스를 업데이트해야 할 때 사용되는 워크플로입니다. 파일을 읽은 후 자동으로 데이터베이스 처리를 진행합니다.
 예시:
-- 사용자 메시지: "/path/to/file.txt 파일을 읽어주세요"
-- 응답: {{"route": "FileReader"}}`,
+- 사용자 메시지: "수권자 변경 서류 전달드립니다"
+- 응답: {{"route": "FileReaderToDatabase"}}`,
 		workflow: createFileReaderAgent(),
 		stateMapper: (state) => ({
 			messages: state.messages,
@@ -59,11 +60,32 @@ export const createRouterAgent = (subAgents: SubAgentConfig[] = SUB_AGENTS) => {
 		(graph, agent) =>
 			graph
 				// biome-ignore lint:suspicious/noExplicitAny
-				.addNode(agent.name as any, createSubAgentNode(agent))
-				// 각 서브 에이전트가 완료되면 메일 작성 노드로 이동
-				.addEdge(agent.name, "create_mail"),
+				.addNode(agent.name as any, createSubAgentNode(agent)),
 		workflow,
 	);
+
+	// CustomerDatabaseAgent 노드 추가
+	workflow.addNode(
+		"CustomerDatabase",
+		createSubAgentNode({
+			name: "CustomerDatabase",
+			description: "고객 데이터베이스 업데이트 처리",
+			workflow: createCustomerDatabaseAgent(),
+			stateMapper: (state) => ({
+				messages: state.messages,
+				content: state.description, // FileReader의 결과를 content로 전달
+			}),
+			outputMapper: (state) => ({
+				description: state.description,
+				attachments: [],
+			}),
+		}),
+	);
+
+	// 에지 연결: GuideProvider는 바로 create_mail로, FileReaderToDatabase는 CustomerDatabase를 거쳐 create_mail로
+	workflow.addEdge("GuideProvider" as any, "create_mail");
+	workflow.addEdge("FileReaderToDatabase" as any, "CustomerDatabase" as any);
+	workflow.addEdge("CustomerDatabase" as any, "create_mail");
 
 	return workflow.compile();
 };

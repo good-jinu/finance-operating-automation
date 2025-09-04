@@ -6,10 +6,10 @@ import { type NextRequest, NextResponse } from "next/server";
 
 export async function PUT(
 	req: NextRequest,
-	{ params }: { params: { tableName: string; id: string } },
+	{ params }: { params: Promise<{ tableName: string; id: string }> },
 ) {
 	try {
-		const { tableName, id } = params;
+		const { tableName, id } = await params;
 		const body = await req.json();
 		const success = await updateTableRow(tableName, Number(id), body);
 		if (success) {
@@ -18,8 +18,9 @@ export async function PUT(
 			return new NextResponse("Update failed", { status: 400 });
 		}
 	} catch (error) {
+		const resolvedParams = await params;
 		console.error(
-			`Error updating data for table ${params.tableName}, id ${params.id}:`,
+			`Error updating data for table ${resolvedParams.tableName}, id ${resolvedParams.id}:`,
 			error,
 		);
 		return new NextResponse("Internal Server Error", { status: 500 });
@@ -28,10 +29,10 @@ export async function PUT(
 
 export async function DELETE(
 	_req: NextRequest,
-	{ params }: { params: { tableName: string; id: string } },
+	{ params }: { params: Promise<{ tableName: string; id: string }> },
 ) {
 	try {
-		const { tableName, id } = params;
+		const { tableName, id } = await params;
 		const success = await deleteTableRow(tableName, Number(id));
 		if (success) {
 			return new NextResponse(null, { status: 204 });
@@ -39,8 +40,9 @@ export async function DELETE(
 			return new NextResponse("Delete failed", { status: 400 });
 		}
 	} catch (error) {
+		const resolvedParams = await params;
 		console.error(
-			`Error deleting data for table ${params.tableName}, id ${params.id}:`,
+			`Error deleting data for table ${resolvedParams.tableName}, id ${resolvedParams.id}:`,
 			error,
 		);
 		return new NextResponse("Internal Server Error", { status: 500 });

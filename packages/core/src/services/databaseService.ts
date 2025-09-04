@@ -118,7 +118,7 @@ export async function deleteTableRow(
 	}
 }
 
-export function getTableSchema(tableName: string): Promise<any[]> {
+export function getTableSchema(tableName: string): any[] {
 	const stmt = db.prepare(`PRAGMA table_info(${tableName})`);
 	return stmt.all();
 }

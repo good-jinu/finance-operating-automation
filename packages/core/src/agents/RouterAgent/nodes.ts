@@ -14,7 +14,7 @@ export const createRouteNode = (subAgents: SubAgentConfig[]) => {
 	return async (state: RouterState) => {
 		if (state.input_filepaths && state.input_filepaths.length > 0) {
 			return new Command({
-				goto: "FileReader",
+				goto: "FileReaderToDatabase",
 			});
 		}
 

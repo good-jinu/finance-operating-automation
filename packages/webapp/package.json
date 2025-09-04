@@ -6,7 +6,7 @@
 		"dev": "tsx server.ts",
 		"prebuild": "node scripts/ensure-directories.js",
 		"build": "next build",
-		"start": "node .next/server.js",
+		"start": "next start",
 		"lint": "next lint"
 	},
 	"dependencies": {

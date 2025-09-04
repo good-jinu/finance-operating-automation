@@ -1,0 +1,151 @@
+# WARP.md
+
+This file provides guidance to WARP (warp.dev) when working with code in this repository.
+
+## Overview
+
+This is an AI-powered automation system for financial institution customer support. It uses Gmail API for email processing and LangChain with ReAct agents to automatically generate appropriate responses to customer inquiries. The system is written in Korean and designed specifically for Korean financial services.
+
+## Project Structure
+
+This is a pnpm monorepo with two main packages:
+- `packages/core`: Core business logic, agents, and services
+- `packages/webapp`: Next.js web application with real-time chat interface
+
+### Core Architecture
+
+The system follows a **multi-agent architecture** using LangChain's LangGraph:
+
+1. **RouterAgent**: Main orchestrator that routes requests to appropriate sub-agents
+2. **GuideProviderAgent**: Provides procedural guides for common tasks
+3. **FileReaderAgent**: Reads and processes document files 
+4. **CustomerDatabaseAgent**: Updates customer database with processed information
+
+The agents use a **ReAct pattern** (Reasoning + Acting) for intelligent decision making and maintain conversation context through memory management.
+
+### Database Schema
+
+Uses SQLite with better-sqlite3, structured around:
+- Customer companies and individual customers
+- Authorized persons and payment accounts
+- Email processing logs and Gmail message tracking
+- Reply mails and file attachments
+
+## Development Commands
+
+### Initial Setup
+```bash
+pnpm install
+```
+
+### Development
+```bash
+# Run development server (Next.js + Socket.IO)
+pnpm dev
+
+# Build the webapp
+pnpm build
+
+# Start production server
+pnpm start
+
+# Build and start (production deployment)
+pnpm build-and-start
+```
+
+### Code Quality
+```bash
+# Run Biome linter and formatter
+pnpm check
+
+# Check specific files
+biome check <file-path>
+```
+
+### Testing Individual Components
+```bash
+# Test specific agent (use tsx for TypeScript execution)
+npx tsx packages/core/src/agents/RouterAgent/RouterAgent.ts
+
+# Test Gmail client functions
+npx tsx packages/core/src/services/gmailClient.ts
+
+# Test database operations
+npx tsx packages/core/src/services/databaseService.ts
+```
+
+## Key Technical Details
+
+### LLM Integration
+- Uses **Ollama** with `midm-2.0-base` model (Korean language model)
+- Chat model created via `createChatModel()` factory function
+- All agents utilize the same base model configuration
+
+### Real-time Communication
+- **Socket.IO** for real-time chat between client and AI agents
+- Streaming responses from LangGraph workflows
+- Session-based chat history persistence
+
+### File Processing
+- Supports Word documents via `mammoth` library
+- File attachments stored in `.storage/files`
+- Database references to processed files for customer records
+
+### Email Automation
+- Gmail API integration with OAuth2 authentication
+- Automatic processing of unread emails
+- HTML/text email content parsing with `html-to-text`
+- Automated reply generation and sending
+
+### Agent Workflow Pattern
+
+Each agent follows a consistent structure:
+- `workflow.ts`: LangGraph state machine definition
+- `nodes.ts`: Individual processing nodes
+- `schemas.ts`: Type definitions and state annotations  
+- `prompts.ts`: LLM prompt templates
+- `AgentName.ts`: Public interface functions
+
+## Configuration
+
+### Required Files
+- `credentials.json`: Google API credentials (not in repo)
+- `token.json`: OAuth2 access tokens (generated on first auth)
+
+### Storage Locations
+- Database: `.storage/database.db`
+- Files: `.storage/files/`
+- Both directories auto-created on first run
+
+### Environment Requirements
+- Node.js >= 22.18.0
+- pnpm >= 10.15.1
+- Ollama server running locally with `midm-2.0-base` model
+
+## Development Patterns
+
+### Adding New Agents
+1. Create agent directory in `packages/core/src/agents/`
+2. Implement the standard files (workflow, nodes, schemas, prompts, main)
+3. Export from `packages/core/src/agents/index.ts`
+4. Register in RouterAgent's `SUB_AGENTS` configuration
+
+### Database Changes
+1. Update schema files in `packages/core/src/database/schema/`
+2. Run migration logic through database service
+3. Update corresponding model types in `packages/core/src/models/`
+
+### Frontend Components
+- Uses **Radix UI** components with **Tailwind CSS**
+- **Zustand** for state management
+- **TanStack Query** for server state
+- Real-time updates via Socket.IO hooks
+
+## Business Context
+
+This system automates three main customer service processes:
+1. **Authority Change Guidance** (`authority_change`): Corporate authorized person changes
+2. **Payment Account Change Guidance** (`payment_account_change`): Direct debit account modifications  
+3. **Seal/Signature Change Guidance** (`seal_sign_change`): Corporate seal and signature updates
+
+The AI agents understand Korean financial terminology and provide appropriate responses in Korean language.
