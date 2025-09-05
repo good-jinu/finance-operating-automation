@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import { parse } from "node:url";
-import { streamRouterAgent } from "@finance-operating-automation/core/agents";
+import { streamChatAgent } from "@finance-operating-automation/core/agents";
 import {
 	getChatHistory,
 	saveChatMessage,
@@ -51,15 +51,28 @@ app.prepare().then(() => {
 				console.error("[DB] Error saving user message:", error);
 			}
 
-			// Call the AI agent with streaming
+			// Call the ChatAgent with streaming
 			try {
-				const agentStream = await streamRouterAgent(message.content);
+				const agentStream = streamChatAgent(message.content, {
+					thread_id: sessionId,
+				});
 
 				let fullResponse = "";
-				let currentMessageId: string | null = null;
+				let isFirstChunk = true;
 
-				for await (const chunk of agentStream) {
-					console.log("Receiving chunk:", chunk);
+				for await (const streamResult of agentStream) {
+					if (!streamResult.success) {
+						console.error("ChatAgent 오류:", streamResult.error);
+						socket.emit("message", {
+							sender: "ai",
+							content: "죄송합니다. 요청을 처리하는 중 오류가 발생했습니다.",
+							isChunk: false,
+						});
+						break;
+					}
+
+					const chunk = streamResult.chunk;
+					console.log("ChatAgent chunk:", chunk);
 
 					// LangGraph stream의 updates 형식 처리
 					for (const [node, values] of Object.entries(chunk)) {
@@ -67,29 +80,25 @@ app.prepare().then(() => {
 						console.log(values);
 						console.log("\n====\n");
 
-						// AI 응답 처리 (노드에서 메시지 콘텐츠 추출)
+						// AI 응답 처리 (메시지 콘텐츠 추출)
 						if (values && typeof values === "object" && "messages" in values) {
 							const messages = values.messages;
 							if (Array.isArray(messages)) {
 								for (const msg of messages) {
 									if (msg?.content && typeof msg.content === "string") {
 										const content = msg.content;
+										
+										// AI 메시지인 경우만 처리
+										if (msg.constructor.name === "AIMessage" || msg._getType?.() === "ai") {
+											fullResponse += content;
 
-										// 메시지 ID 추적 (같은 메시지의 청크들을 그룹화)
-										const messageId = msg.id || `${Date.now()}-${node}`;
-										if (messageId !== currentMessageId) {
-											currentMessageId = messageId;
+											// 클라이언트로 청크 전솨
+											socket.emit("message", {
+												sender: "ai",
+												content: content,
+												isChunk: true,
+											});
 										}
-
-										fullResponse += content;
-
-										// 클라이언트로 청크 전송
-										socket.emit("message", {
-											sender: "ai",
-											content: content,
-											messageId: currentMessageId,
-											isChunk: true,
-										});
 									}
 								}
 							}
@@ -101,7 +110,6 @@ app.prepare().then(() => {
 							socket.emit("message", {
 								sender: "ai",
 								content: values,
-								messageId: `${Date.now()}-${node}`,
 								isChunk: true,
 							});
 						}

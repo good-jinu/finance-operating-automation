@@ -2,6 +2,8 @@ export {
 	invokeChatAgent,
 	continueChatAgent,
 	resetChatAgent,
+	streamChatAgent,
+	streamContinueChatAgent,
 	chatAgent,
 } from "./ChatAgent/ChatAgent";
 export { runCustomerDatabaseAgent } from "./CustomerDatabaseAgent/CustomerDatabaseAgent";

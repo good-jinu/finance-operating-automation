@@ -144,6 +144,65 @@ export async function resetChatAgent(thread_id: string) {
 }
 
 /**
+ * ChatAgent 스트리밍 함수
+ */
+export async function* streamChatAgent(
+	message: string,
+	config: ChatAgentConfig = {},
+) {
+	const {
+		thread_id = "default",
+		max_iterations = 5,
+		recursion_limit = 10,
+	} = config;
+
+	try {
+		// 시스템 프롬프트와 사용자 메시지를 함께 전달
+		const messages = [
+			new HumanMessage(SYSTEM_PROMPT),
+			new HumanMessage(message),
+		];
+
+		// 스트리밍 호출
+		const stream = await agent.stream(
+			{ messages },
+			{
+				configurable: { thread_id },
+				recursionLimit: recursion_limit,
+				streamMode: "updates",
+			},
+		);
+
+		// 스트림 청크를 yield
+		for await (const chunk of stream) {
+			yield {
+				success: true,
+				chunk,
+				thread_id,
+			};
+		}
+	} catch (error) {
+		console.error("ChatAgent 스트리밍 중 오류 발생:", error);
+		yield {
+			success: false,
+			error: `ChatAgent 스트리밍 중 오류가 발생했습니다: ${error}`,
+			thread_id: config.thread_id || "default",
+		};
+	}
+}
+
+/**
+ * ChatAgent 연속 스트리밍 함수
+ */
+export async function* streamContinueChatAgent(
+	message: string,
+	thread_id: string,
+	config: Omit<ChatAgentConfig, "thread_id"> = {},
+) {
+	yield* streamChatAgent(message, { ...config, thread_id });
+}
+
+/**
  * ChatAgent 기본 내보내기
  */
 export { agent as chatAgent };
@@ -151,5 +210,7 @@ export default {
 	invoke: invokeChatAgent,
 	continue: continueChatAgent,
 	reset: resetChatAgent,
+	stream: streamChatAgent,
+	streamContinue: streamContinueChatAgent,
 	agent,
 };

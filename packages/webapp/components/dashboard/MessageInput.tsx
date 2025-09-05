@@ -1,6 +1,7 @@
-import { Send } from "lucide-react";
+import { Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useChatStore } from "@/store/chat";
 
 interface MessageInputProps {
 	input: string;
@@ -13,16 +14,24 @@ export default function MessageInput({
 	handleInputChange,
 	handleSubmit,
 }: MessageInputProps) {
+	const { isStreaming } = useChatStore();
 	return (
 		<form onSubmit={handleSubmit} className="flex items-center gap-2">
 			<Input
 				value={input}
 				onChange={handleInputChange}
-				placeholder="메시지를 입력하세요..."
+				placeholder={
+					isStreaming ? "AI가 응답 중입니다..." : "메시지를 입력하세요..."
+				}
 				className="flex-1"
+				disabled={isStreaming}
 			/>
-			<Button type="submit" size="icon">
-				<Send className="h-4 w-4" />
+			<Button type="submit" size="icon" disabled={isStreaming || !input.trim()}>
+				{isStreaming ? (
+					<Loader2 className="h-4 w-4 animate-spin" />
+				) : (
+					<Send className="h-4 w-4" />
+				)}
 			</Button>
 		</form>
 	);

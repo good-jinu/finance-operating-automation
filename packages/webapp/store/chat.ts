@@ -8,15 +8,19 @@ export interface Message {
 
 interface ChatState {
 	messages: Message[];
+	currentSessionId: string | null;
 	setHistory: (messages: Message[]) => void;
 	addMessage: (message: Message) => void;
 	appendLastMessage: (chunk: string) => void;
 	isStreaming: boolean;
 	setIsStreaming: (isStreaming: boolean) => void;
+	setCurrentSessionId: (sessionId: string) => void;
+	clearChat: () => void;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
 	messages: [],
+	currentSessionId: null,
 	isStreaming: false,
 	setHistory: (messages) => set({ messages }),
 	addMessage: (message) => {
@@ -52,4 +56,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
 		});
 	},
 	setIsStreaming: (isStreaming) => set({ isStreaming }),
+	setCurrentSessionId: (sessionId) => set({ currentSessionId: sessionId }),
+	clearChat: () => set({ messages: [], isStreaming: false }),
 }));

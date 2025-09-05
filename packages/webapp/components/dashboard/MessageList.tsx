@@ -1,7 +1,8 @@
-import { Bot, User } from "lucide-react";
+import { Bot, User, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useChatStore } from "@/store/chat";
 
 // This structure should be consistent with the one in useChat.ts and the store.
 interface Message {
@@ -11,6 +12,7 @@ interface Message {
 }
 
 export default function MessageList({ messages }: { messages: Message[] }) {
+	const { isStreaming } = useChatStore();
 	if (messages.length === 0) {
 		return (
 			<div className="flex h-full items-center justify-center">
@@ -38,7 +40,12 @@ export default function MessageList({ messages }: { messages: Message[] }) {
 					{message.sender === "ai" && (
 						<Avatar className="h-8 w-8">
 							<AvatarFallback>
-								<Bot className="h-5 w-5" />
+								{/* 마지막 AI 메시지이고 스트리밍 중이라면 로더 표시 */}
+								{isStreaming && messages[messages.length - 1]?.id === message.id ? (
+									<Loader2 className="h-5 w-5 animate-spin" />
+								) : (
+									<Bot className="h-5 w-5" />
+								)}
 							</AvatarFallback>
 						</Avatar>
 					)}
@@ -48,9 +55,23 @@ export default function MessageList({ messages }: { messages: Message[] }) {
 							message.sender === "user"
 								? "bg-primary text-primary-foreground"
 								: "bg-muted",
+							/* 스트리밍 중이면 약간의 기다림 효과 */
+							isStreaming && 
+							message.sender === "ai" && 
+							messages[messages.length - 1]?.id === message.id
+								? "animate-pulse"
+								: "",
 						)}
 					>
-						<CardContent className="p-0 text-sm">{message.content}</CardContent>
+						<CardContent className="p-0 text-sm whitespace-pre-wrap">
+							{message.content}
+							{/* 스트리밍 중이고 마지막 AI 메시지라면 커서 표시 */}
+							{isStreaming && 
+								message.sender === "ai" && 
+								messages[messages.length - 1]?.id === message.id && (
+									<span className="inline-block w-2 h-5 ml-1 bg-current animate-pulse" />
+								)}
+						</CardContent>
 					</Card>
 					{message.sender === "user" && (
 						<Avatar className="h-8 w-8">
