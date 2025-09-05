@@ -42,7 +42,7 @@ export const routeRequest = async (
 
 	console.log(
 		"📄 [routeRequest] 분석할 내용:",
-		contentToAnalyze.substring(0, 200) + "...",
+		`${contentToAnalyze.substring(0, 200)}...`,
 	);
 
 	const routePrompt = `
@@ -380,7 +380,7 @@ export const executeUpdate = async (
 						existingAccount = accounts[0]; // 가장 최근 등록된 계좌 사용
 						console.log(
 							"✅ [executeUpdate] 은행명 검색 결과:",
-							accounts.length + "개 발견",
+							`${accounts.length}개 발견`,
 						);
 					}
 				}

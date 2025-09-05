@@ -128,7 +128,7 @@ export async function resetChatAgent(thread_id: string) {
 			{ messages: [new HumanMessage("대화를 초기화합니다.")] },
 			{ configurable: { thread_id } },
 		);
-		
+
 		return {
 			success: true,
 			message: "대화 히스토리가 초기화되었습니다.",

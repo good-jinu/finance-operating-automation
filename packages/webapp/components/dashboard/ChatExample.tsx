@@ -42,7 +42,7 @@ export default function ChatExample() {
 					<ChatInterface sessionId={sessionId} />
 				</CardContent>
 			</Card>
-			
+
 			{/* 사용법 안내 */}
 			<Card className="mt-4">
 				<CardHeader>
@@ -50,12 +50,24 @@ export default function ChatExample() {
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-2">
-						<p className="text-sm">💬 <strong>일반 대화:</strong> "안녕하세요"</p>
-						<p className="text-sm">📧 <strong>이메일 조회:</strong> "오늘 온 메일을 보여줘"</p>
-						<p className="text-sm">🏢 <strong>회사 검색:</strong> "ABC회사 정보를 알려줘"</p>
-						<p className="text-sm">👤 <strong>수권자 관리:</strong> "김수권 수권자의 정보를 변경해줘"</p>
-						<p className="text-sm">💳 <strong>계좌 관리:</strong> "결제계좌를 변경하고 싶어"</p>
-						<p className="text-sm">🔒 <strong>인감 관리:</strong> "인감을 새로 등록하려고 해"</p>
+						<p className="text-sm">
+							💬 <strong>일반 대화:</strong> "안녕하세요"
+						</p>
+						<p className="text-sm">
+							📧 <strong>이메일 조회:</strong> "오늘 온 메일을 보여줘"
+						</p>
+						<p className="text-sm">
+							🏢 <strong>회사 검색:</strong> "ABC회사 정보를 알려줘"
+						</p>
+						<p className="text-sm">
+							👤 <strong>수권자 관리:</strong> "김수권 수권자의 정보를 변경해줘"
+						</p>
+						<p className="text-sm">
+							💳 <strong>계좌 관리:</strong> "결제계좌를 변경하고 싶어"
+						</p>
+						<p className="text-sm">
+							🔒 <strong>인감 관리:</strong> "인감을 새로 등록하려고 해"
+						</p>
 					</div>
 				</CardContent>
 			</Card>

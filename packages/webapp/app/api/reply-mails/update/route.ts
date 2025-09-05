@@ -13,7 +13,7 @@ export async function PUT(request: NextRequest) {
 			);
 		}
 
-		const updated = updateReplyMail(id, subject, reply_body);
+		const _updated = updateReplyMail(id, subject, reply_body);
 
 		return NextResponse.json({
 			success: true,

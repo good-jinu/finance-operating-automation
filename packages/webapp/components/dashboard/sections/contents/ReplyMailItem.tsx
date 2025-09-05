@@ -1,7 +1,16 @@
 "use client";
 
 import type { ReplyMailWithOriginal } from "@finance-operating-automation/core/models";
-import {Check, Edit, Paperclip, RefreshCw, Send, Trash2, User, X} from "lucide-react";
+import {
+	Check,
+	Edit,
+	Paperclip,
+	RefreshCw,
+	Send,
+	Trash2,
+	User,
+	X,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -9,7 +18,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {useDeleteReplyMail, useSendReplyMail, useUpdateReplyMail} from "@/hooks/useReplyMails";
+import {
+	useDeleteReplyMail,
+	useSendReplyMail,
+	useUpdateReplyMail,
+} from "@/hooks/useReplyMails";
 import { useDownloadStaticAttachment } from "@/hooks/useStaticAttachments";
 import { parseAttachments } from "@/lib/attachmentUtils";
 
@@ -64,7 +77,7 @@ export function ReplyMailItem({ replyMail }: ReplyMailItemProps) {
 			});
 			setIsEditing(false);
 			toast.success("메일이 성공적으로 수정되었습니다.");
-		} catch (error) {
+		} catch (_error) {
 			toast.error("메일 수정에 실패했습니다.");
 		}
 	};
@@ -84,7 +97,7 @@ export function ReplyMailItem({ replyMail }: ReplyMailItemProps) {
 		try {
 			await deleteReplyMailMutation.mutateAsync(replyMail.id);
 			toast.success("메일이 성공적으로 삭제되었습니다.");
-		} catch (error) {
+		} catch (_error) {
 			toast.error("메일 삭제에 실패했습니다.");
 		}
 	};
@@ -134,9 +147,15 @@ export function ReplyMailItem({ replyMail }: ReplyMailItemProps) {
 
 					{/* Subject */}
 					<div className="space-y-2">
-						<label className="text-xs font-medium text-gray-600">제목</label>
+						<label
+							className="text-xs font-medium text-gray-600"
+							htmlFor="reply-title"
+						>
+							제목
+						</label>
 						{isEditing ? (
 							<Input
+								name="reply-title"
 								value={editedSubject}
 								onChange={(e) => setEditedSubject(e.target.value)}
 								className="text-sm font-medium"
@@ -157,11 +176,15 @@ export function ReplyMailItem({ replyMail }: ReplyMailItemProps) {
 
 					{/* Reply Body */}
 					<div className="space-y-2">
-						<label className="text-xs font-medium text-gray-600">
+						<label
+							className="text-xs font-medium text-gray-600"
+							htmlFor="reply-body"
+						>
 							답변 내용
 						</label>
 						{isEditing ? (
 							<Textarea
+								name="reply-body"
 								value={editedBody}
 								onChange={(e) => setEditedBody(e.target.value)}
 								className="min-h-[120px] text-sm resize-none"
@@ -201,77 +224,74 @@ export function ReplyMailItem({ replyMail }: ReplyMailItemProps) {
 
 					{/* Actions */}
 					<div className="flex items-center gap-2 pt-2">
-						{!replyMail.is_sent && (
-							<>
-								{isEditing ? (
-									<>
-										<Button
-											size="sm"
-											variant="default"
-											onClick={handleSaveEdit}
-											disabled={updateReplyMailMutation.isPending}
-											className="gap-2 bg-blue-600 hover:bg-blue-700"
-										>
-											{updateReplyMailMutation.isPending ? (
-												<RefreshCw className="w-3 h-3 animate-spin" />
-											) : (
-												<Check className="w-3 h-3" />
-											)}
-											저장
-										</Button>
-										<Button
-											size="sm"
-											variant="outline"
-											onClick={handleCancelEdit}
-											className="gap-2"
-										>
-											<X className="w-3 h-3" />
-											취소
-										</Button>
-									</>
-								) : (
-									<>
-										<Button
-											size="sm"
-											variant="outline"
-											onClick={handleEdit}
-											className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50"
-										>
-											<Edit className="w-3 h-3" />
-											편집
-										</Button>
-										<Button
-											size="sm"
-											variant="default"
-											onClick={handleSend}
-											disabled={sendReplyMailMutation.isPending}
-											className="gap-2 bg-green-600 hover:bg-green-700"
-										>
-											{sendReplyMailMutation.isPending ? (
-												<RefreshCw className="w-3 h-3 animate-spin" />
-											) : (
-												<Send className="w-3 h-3" />
-											)}
-											전송
-										</Button>
-											<Button
-												size="sm"
-												variant="outline"
-												onClick={handleDelete}
-												disabled={deleteReplyMailMutation.isPending}
-												className="gap-2 border-red-200 text-red-700 hover:bg-red-50"
-											>
-												{deleteReplyMailMutation.isPending ? (
-													<RefreshCw className="w-3 h-3 animate-spin" />
-												) : (
-													<Trash2 className="w-3 h-3" />
-												)}
-												삭제
-											</Button>
-									</>
-								)}
-							</>
-						)}
+						{!replyMail.is_sent &&
+							(isEditing ? (
+								<>
+									<Button
+										size="sm"
+										variant="default"
+										onClick={handleSaveEdit}
+										disabled={updateReplyMailMutation.isPending}
+										className="gap-2 bg-blue-600 hover:bg-blue-700"
+									>
+										{updateReplyMailMutation.isPending ? (
+											<RefreshCw className="w-3 h-3 animate-spin" />
+										) : (
+											<Check className="w-3 h-3" />
+										)}
+										저장
+									</Button>
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={handleCancelEdit}
+										className="gap-2"
+									>
+										<X className="w-3 h-3" />
+										취소
+									</Button>
+								</>
+							) : (
+								<>
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={handleEdit}
+										className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+									>
+										<Edit className="w-3 h-3" />
+										편집
+									</Button>
+									<Button
+										size="sm"
+										variant="default"
+										onClick={handleSend}
+										disabled={sendReplyMailMutation.isPending}
+										className="gap-2 bg-green-600 hover:bg-green-700"
+									>
+										{sendReplyMailMutation.isPending ? (
+											<RefreshCw className="w-3 h-3 animate-spin" />
+										) : (
+											<Send className="w-3 h-3" />
+										)}
+										전송
+									</Button>
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={handleDelete}
+										disabled={deleteReplyMailMutation.isPending}
+										className="gap-2 border-red-200 text-red-700 hover:bg-red-50"
+									>
+										{deleteReplyMailMutation.isPending ? (
+											<RefreshCw className="w-3 h-3 animate-spin" />
+										) : (
+											<Trash2 className="w-3 h-3" />
+										)}
+										삭제
+									</Button>
+								</>
+							))}
 						{replyMail.sent_at && (
 							<span className="text-xs text-gray-500 ml-auto">
 								전송일:{" "}

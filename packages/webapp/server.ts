@@ -58,7 +58,7 @@ app.prepare().then(() => {
 				});
 
 				let fullResponse = "";
-				let isFirstChunk = true;
+				const _isFirstChunk = true;
 
 				for await (const streamResult of agentStream) {
 					if (!streamResult.success) {
@@ -71,7 +71,7 @@ app.prepare().then(() => {
 						break;
 					}
 
-					const chunk = streamResult.chunk;
+					const chunk = streamResult.chunk ?? {};
 					console.log("ChatAgent chunk:", chunk);
 
 					// LangGraph stream의 updates 형식 처리
@@ -87,9 +87,12 @@ app.prepare().then(() => {
 								for (const msg of messages) {
 									if (msg?.content && typeof msg.content === "string") {
 										const content = msg.content;
-										
+
 										// AI 메시지인 경우만 처리
-										if (msg.constructor.name === "AIMessage" || msg._getType?.() === "ai") {
+										if (
+											msg.constructor.name === "AIMessage" ||
+											msg._getType?.() === "ai"
+										) {
 											fullResponse += content;
 
 											// 클라이언트로 청크 전솨

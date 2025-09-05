@@ -1,33 +1,37 @@
 import { DynamicTool } from "@langchain/core/tools";
-import { createGmailClient } from "../../services/gmailClient";
-import { findAllReplyMails, findReplyMailsByStatus } from "../../models/ReplyMail";
-import { findAllGmailMessages, findUnreadGmailMessages } from "../../models/GmailMessage";
-import {
-	findCustomerCompanyByName,
-	findAllCustomerCompanies,
-} from "../../models/CustomerCompany";
 import {
 	findAuthorizedPersonByName,
-	updateAuthorizedPerson,
 	findAuthorizedPersonsByCompanyId,
+	updateAuthorizedPerson,
 } from "../../models/AuthorizedPerson";
 import {
-	findPaymentAccountByAccountNumber,
-	findPaymentAccountByAccountHolder,
-	updatePaymentAccount,
-	findPaymentAccountsByCompanyId,
-} from "../../models/PaymentAccount";
+	findAllCustomerCompanies,
+	findCustomerCompanyByName,
+} from "../../models/CustomerCompany";
 import {
 	findLatestOfficialSealByCompanyId,
 	updateOfficialSeal,
 } from "../../models/OfficialSeal";
+import {
+	findPaymentAccountByAccountHolder,
+	findPaymentAccountByAccountNumber,
+	findPaymentAccountsByCompanyId,
+	updatePaymentAccount,
+} from "../../models/PaymentAccount";
+import {
+	findAllReplyMails,
+	findReplyMailsByStatus,
+	type ReplyMailWithOriginal,
+} from "../../models/ReplyMail";
+import { createGmailClient } from "../../services/gmailClient";
 
 /**
  * Gmail 메일 목록 조회 도구
  */
 export const gmailListTool = new DynamicTool({
 	name: "gmail_list",
-	description: "Gmail에서 메일 목록을 조회합니다. 읽지 않은 메일만 조회하거나 전체 메일을 조회할 수 있습니다.",
+	description:
+		"Gmail에서 메일 목록을 조회합니다. 읽지 않은 메일만 조회하거나 전체 메일을 조회할 수 있습니다.",
 	func: async (input: string) => {
 		try {
 			const params = JSON.parse(input) as {
@@ -71,7 +75,8 @@ export const gmailListTool = new DynamicTool({
  */
 export const replyMailListTool = new DynamicTool({
 	name: "reply_mail_list",
-	description: "생성된 답장 메일 목록을 조회합니다. 발송된/미발송 답장 메일을 필터링할 수 있습니다.",
+	description:
+		"생성된 답장 메일 목록을 조회합니다. 발송된/미발송 답장 메일을 필터링할 수 있습니다.",
 	func: async (input: string) => {
 		try {
 			const params = JSON.parse(input) as {
@@ -80,7 +85,7 @@ export const replyMailListTool = new DynamicTool({
 				limit?: number;
 			};
 
-			let replyMails;
+			let replyMails: ReplyMailWithOriginal[] = [];
 			if (params.sent_only) {
 				replyMails = findReplyMailsByStatus(true, params.limit || 50);
 			} else if (params.unsent_only) {
@@ -108,7 +113,8 @@ export const replyMailListTool = new DynamicTool({
  */
 export const companySearchTool = new DynamicTool({
 	name: "company_search",
-	description: "회사명으로 회사 정보를 검색합니다. 정확한 회사명이나 부분 검색을 지원합니다.",
+	description:
+		"회사명으로 회사 정보를 검색합니다. 정확한 회사명이나 부분 검색을 지원합니다.",
 	func: async (input: string) => {
 		try {
 			const params = JSON.parse(input) as {
@@ -158,7 +164,8 @@ export const companySearchTool = new DynamicTool({
  */
 export const authorizedPersonTool = new DynamicTool({
 	name: "authorized_person",
-	description: "수권자 정보를 조회하거나 변경합니다. 회사명과 수권자명으로 검색하고 업데이트할 수 있습니다.",
+	description:
+		"수권자 정보를 조회하거나 변경합니다. 회사명과 수권자명으로 검색하고 업데이트할 수 있습니다.",
 	func: async (input: string) => {
 		try {
 			const params = JSON.parse(input) as {
@@ -192,8 +199,11 @@ export const authorizedPersonTool = new DynamicTool({
 				}
 
 				if (params.person_name) {
-					const person = findAuthorizedPersonByName(params.person_name, company.id);
-					
+					const person = findAuthorizedPersonByName(
+						params.person_name,
+						company.id,
+					);
+
 					if (params.action === "search") {
 						if (!person) {
 							return JSON.stringify({
@@ -222,7 +232,10 @@ export const authorizedPersonTool = new DynamicTool({
 							});
 						}
 
-						const success = updateAuthorizedPerson(person.id!, params.update_data);
+						const success = updateAuthorizedPerson(
+							person.id!,
+							params.update_data,
+						);
 						return JSON.stringify({
 							success,
 							message: success
@@ -235,7 +248,8 @@ export const authorizedPersonTool = new DynamicTool({
 
 			return JSON.stringify({
 				success: false,
-				error: "필수 파라미터가 누락되었습니다. (company_name, person_name, action)",
+				error:
+					"필수 파라미터가 누락되었습니다. (company_name, person_name, action)",
 			});
 		} catch (error) {
 			return JSON.stringify({
@@ -251,11 +265,16 @@ export const authorizedPersonTool = new DynamicTool({
  */
 export const paymentAccountTool = new DynamicTool({
 	name: "payment_account",
-	description: "결제계좌 정보를 조회하거나 변경합니다. 계좌번호, 예금주명으로 검색하고 업데이트할 수 있습니다.",
+	description:
+		"결제계좌 정보를 조회하거나 변경합니다. 계좌번호, 예금주명으로 검색하고 업데이트할 수 있습니다.",
 	func: async (input: string) => {
 		try {
 			const params = JSON.parse(input) as {
-				action: "search_by_account" | "search_by_holder" | "update" | "list_by_company";
+				action:
+					| "search_by_account"
+					| "search_by_holder"
+					| "update"
+					| "list_by_company";
 				company_name?: string;
 				account_number?: string;
 				account_holder?: string;
@@ -287,22 +306,37 @@ export const paymentAccountTool = new DynamicTool({
 
 				let account = null;
 				if (params.action === "search_by_account" && params.account_number) {
-					account = findPaymentAccountByAccountNumber(params.account_number, company.id);
-				} else if (params.action === "search_by_holder" && params.account_holder) {
-					account = findPaymentAccountByAccountHolder(params.account_holder, company.id);
+					account = findPaymentAccountByAccountNumber(
+						params.account_number,
+						company.id,
+					);
+				} else if (
+					params.action === "search_by_holder" &&
+					params.account_holder
+				) {
+					account = findPaymentAccountByAccountHolder(
+						params.account_holder,
+						company.id,
+					);
 				} else if (params.action === "update") {
 					// 업데이트의 경우 계좌번호나 예금주명으로 찾기
 					if (params.account_number) {
-						account = findPaymentAccountByAccountNumber(params.account_number, company.id);
+						account = findPaymentAccountByAccountNumber(
+							params.account_number,
+							company.id,
+						);
 					} else if (params.account_holder) {
-						account = findPaymentAccountByAccountHolder(params.account_holder, company.id);
+						account = findPaymentAccountByAccountHolder(
+							params.account_holder,
+							company.id,
+						);
 					}
 				}
 
 				if (params.action.startsWith("search")) {
 					if (!account) {
-						const searchInfo = params.account_number 
-							? `계좌번호 '${params.account_number}'` 
+						const searchInfo = params.account_number
+							? `계좌번호 '${params.account_number}'`
 							: `예금주 '${params.account_holder}'`;
 						return JSON.stringify({
 							success: false,
@@ -317,11 +351,11 @@ export const paymentAccountTool = new DynamicTool({
 
 				if (params.action === "update") {
 					if (!account) {
-						const searchInfo = params.account_number 
-							? `계좌번호 '${params.account_number}'` 
-							: params.account_holder 
-							? `예금주 '${params.account_holder}'` 
-							: "지정된 조건";
+						const searchInfo = params.account_number
+							? `계좌번호 '${params.account_number}'`
+							: params.account_holder
+								? `예금주 '${params.account_holder}'`
+								: "지정된 조건";
 						return JSON.stringify({
 							success: false,
 							error: `회사 '${params.company_name}'에서 ${searchInfo}에 해당하는 결제계좌를 찾을 수 없습니다.`,
@@ -336,8 +370,8 @@ export const paymentAccountTool = new DynamicTool({
 					}
 
 					const success = updatePaymentAccount(account.id!, params.update_data);
-					const accountInfo = params.account_number 
-						? `계좌번호 '${params.account_number}'` 
+					const accountInfo = params.account_number
+						? `계좌번호 '${params.account_number}'`
 						: `예금주 '${params.account_holder}'`;
 					return JSON.stringify({
 						success,
@@ -366,7 +400,8 @@ export const paymentAccountTool = new DynamicTool({
  */
 export const officialSealTool = new DynamicTool({
 	name: "official_seal",
-	description: "회사의 인감/서명 정보를 조회하거나 변경합니다. 회사명으로 검색하고 파일 경로를 업데이트할 수 있습니다.",
+	description:
+		"회사의 인감/서명 정보를 조회하거나 변경합니다. 회사명으로 검색하고 파일 경로를 업데이트할 수 있습니다.",
 	func: async (input: string) => {
 		try {
 			const params = JSON.parse(input) as {
@@ -394,7 +429,7 @@ export const officialSealTool = new DynamicTool({
 			}
 
 			const seal = findLatestOfficialSealByCompanyId(company.id!);
-			
+
 			if (params.action === "search") {
 				if (!seal) {
 					return JSON.stringify({
