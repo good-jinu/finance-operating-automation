@@ -10,13 +10,14 @@ interface ChatInterfaceProps {
 }
 
 export default function ChatInterface({ sessionId }: ChatInterfaceProps) {
-	const { messages, input, handleInputChange, handleSubmit } = useChat(sessionId);
+	const { messages, input, handleInputChange, handleSubmit } =
+		useChat(sessionId);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
 	// 새 메시지가 추가될 때마다 자동 스크롤
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-	}, [messages]);
+	}, []);
 
 	return (
 		<div className="flex flex-col h-full">

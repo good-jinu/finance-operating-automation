@@ -4,7 +4,9 @@ import { type Message, useChatStore } from "@/store/chat";
 
 export const useChat = (sessionId?: string) => {
 	// 세션 ID가 없으면 고유 ID 생성
-	const generatedSessionId = sessionId || `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+	const generatedSessionId =
+		sessionId ||
+		`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 	const {
 		messages,
 		setHistory,
@@ -13,7 +15,7 @@ export const useChat = (sessionId?: string) => {
 		setIsStreaming,
 	} = useChatStore();
 	const [input, setInput] = useState("");
-	const socketRef = useRef(socket);
+	const _socketRef = useRef(socket);
 
 	useEffect(() => {
 		// Configure socket connection
@@ -64,7 +66,13 @@ export const useChat = (sessionId?: string) => {
 			socket.off("streamEnd");
 			socket.off("disconnect");
 		};
-	}, [generatedSessionId, setHistory, addMessage, appendLastMessage, setIsStreaming]);
+	}, [
+		generatedSessionId,
+		setHistory,
+		addMessage,
+		appendLastMessage,
+		setIsStreaming,
+	]);
 
 	const handleInputChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,

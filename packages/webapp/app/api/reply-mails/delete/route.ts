@@ -13,7 +13,7 @@ export async function DELETE(request: NextRequest) {
 			);
 		}
 
-		const deleted = removeReplyMail(id);
+		const _deleted = removeReplyMail(id);
 
 		return NextResponse.json({
 			success: true,
@@ -23,9 +23,13 @@ export async function DELETE(request: NextRequest) {
 		console.error("Error deleting reply mail:", error);
 
 		// 구체적인 에러 메시지 반환
-		const errorMessage = error instanceof Error ? error.message : "Failed to delete reply mail";
-		const statusCode = errorMessage.includes("not found") ? 404 : 
-						   errorMessage.includes("already sent") ? 409 : 500;
+		const errorMessage =
+			error instanceof Error ? error.message : "Failed to delete reply mail";
+		const statusCode = errorMessage.includes("not found")
+			? 404
+			: errorMessage.includes("already sent")
+				? 409
+				: 500;
 
 		return NextResponse.json(
 			{ success: false, error: errorMessage },

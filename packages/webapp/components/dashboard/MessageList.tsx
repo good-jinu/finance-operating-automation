@@ -1,4 +1,4 @@
-import { Bot, User, Loader2 } from "lucide-react";
+import { Bot, Loader2, User } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -41,7 +41,8 @@ export default function MessageList({ messages }: { messages: Message[] }) {
 						<Avatar className="h-8 w-8">
 							<AvatarFallback>
 								{/* 마지막 AI 메시지이고 스트리밍 중이라면 로더 표시 */}
-								{isStreaming && messages[messages.length - 1]?.id === message.id ? (
+								{isStreaming &&
+								messages[messages.length - 1]?.id === message.id ? (
 									<Loader2 className="h-5 w-5 animate-spin" />
 								) : (
 									<Bot className="h-5 w-5" />
@@ -56,9 +57,9 @@ export default function MessageList({ messages }: { messages: Message[] }) {
 								? "bg-primary text-primary-foreground"
 								: "bg-muted",
 							/* 스트리밍 중이면 약간의 기다림 효과 */
-							isStreaming && 
-							message.sender === "ai" && 
-							messages[messages.length - 1]?.id === message.id
+							isStreaming &&
+								message.sender === "ai" &&
+								messages[messages.length - 1]?.id === message.id
 								? "animate-pulse"
 								: "",
 						)}
@@ -66,8 +67,8 @@ export default function MessageList({ messages }: { messages: Message[] }) {
 						<CardContent className="p-0 text-sm whitespace-pre-wrap">
 							{message.content}
 							{/* 스트리밍 중이고 마지막 AI 메시지라면 커서 표시 */}
-							{isStreaming && 
-								message.sender === "ai" && 
+							{isStreaming &&
+								message.sender === "ai" &&
 								messages[messages.length - 1]?.id === message.id && (
 									<span className="inline-block w-2 h-5 ml-1 bg-current animate-pulse" />
 								)}
