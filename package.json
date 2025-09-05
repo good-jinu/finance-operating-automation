@@ -10,7 +10,7 @@
 		"build-and-start": "pnpm build && pnpm start",
 		"check": "biome check --write",
 		"test": "pnpm -r test",
-		"coverage": "pnpm -r test -- --coverage"
+		"coverage": "pnpm -r test --coverage"
 	},
 	"keywords": [],
 	"author": "",
