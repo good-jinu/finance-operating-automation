@@ -33,13 +33,17 @@ export function findCustomerCompanyById(id: number): CustomerCompany | null {
 	return stmt.get(id) as CustomerCompany | null;
 }
 
-export function findCustomerCompanyByName(name: string): CustomerCompany | null {
+export function findCustomerCompanyByName(
+	name: string,
+): CustomerCompany | null {
 	const stmt = db.prepare("SELECT * FROM customers_company WHERE name = ?");
 	return stmt.get(name) as CustomerCompany | null;
 }
 
 export function searchCustomerCompaniesByName(name: string): CustomerCompany[] {
-	const stmt = db.prepare("SELECT * FROM customers_company WHERE name LIKE ? ORDER BY created_at DESC");
+	const stmt = db.prepare(
+		"SELECT * FROM customers_company WHERE name LIKE ? ORDER BY created_at DESC",
+	);
 	return stmt.all(`%${name}%`) as CustomerCompany[];
 }
 
