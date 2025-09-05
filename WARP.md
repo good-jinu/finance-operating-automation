@@ -17,9 +17,10 @@ This is a pnpm monorepo with two main packages:
 The system follows a **multi-agent architecture** using LangChain's LangGraph:
 
 1. **RouterAgent**: Main orchestrator that routes requests to appropriate sub-agents
-2. **GuideProviderAgent**: Provides procedural guides for common tasks
-3. **FileReaderAgent**: Reads and processes document files 
-4. **CustomerDatabaseAgent**: Updates customer database with processed information
+2. **ChatAgent**: Interactive conversational agent using createReactAgent with custom tools
+3. **GuideProviderAgent**: Provides procedural guides for common tasks
+4. **FileReaderAgent**: Reads and processes document files 
+5. **CustomerDatabaseAgent**: Updates customer database with processed information
 
 The agents use a **ReAct pattern** (Reasoning + Acting) for intelligent decision making and maintain conversation context through memory management.
 
@@ -67,6 +68,15 @@ biome check <file-path>
 # Test specific agent (use tsx for TypeScript execution)
 npx tsx packages/core/src/agents/RouterAgent/RouterAgent.ts
 
+# Test ChatAgent with all tools
+npx tsx packages/core/src/agents/ChatAgent/test.ts
+
+# Run ChatAgent examples
+npx tsx packages/core/src/agents/ChatAgent/examples.ts
+
+# Interactive ChatAgent mode
+npx tsx packages/core/src/agents/ChatAgent/examples.ts --interactive
+
 # Test Gmail client functions
 npx tsx packages/core/src/services/gmailClient.ts
 
@@ -105,6 +115,37 @@ Each agent follows a consistent structure:
 - `schemas.ts`: Type definitions and state annotations  
 - `prompts.ts`: LLM prompt templates
 - `AgentName.ts`: Public interface functions
+
+### ChatAgent Architecture
+
+The ChatAgent uses a different pattern based on **createReactAgent**:
+
+- **tools.ts**: Custom LangChain tools for business operations
+- **ChatAgent.ts**: Main agent using createReactAgent with MemorySaver
+- **test.ts**: Integration tests for all tools
+- **examples.ts**: Usage examples and interactive mode
+
+#### Available Tools
+1. **gmail_list**: Gmail message list retrieval
+2. **reply_mail_list**: Reply mail status and management
+3. **company_search**: Customer company information lookup
+4. **authorized_person**: Authorized person management (search/update)
+5. **payment_account**: Payment account management (search/update)
+6. **official_seal**: Official seal/signature management (search/update)
+
+#### Usage Pattern
+```typescript
+import { invokeChatAgent, continueChatAgent } from './agents/ChatAgent/ChatAgent';
+
+// Single request
+const response = await invokeChatAgent("ABC회사의 수권자 목록을 보여주세요.");
+
+// Continuous conversation with context
+const followUp = await continueChatAgent(
+  "김수권 수권자의 전화번호를 변경해주세요.", 
+  "session-id"
+);
+```
 
 ## Configuration
 
