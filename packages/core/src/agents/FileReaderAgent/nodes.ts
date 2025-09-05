@@ -18,10 +18,8 @@ export const extractFileNode = async (
 		docs.push(await loader.load());
 	}
 
-	console.log(docs);
-
 	return {
-		content: JSON.stringify(docs),
+		content: docs[0]?.[0]?.pageContent ?? "",
 	};
 };
 
