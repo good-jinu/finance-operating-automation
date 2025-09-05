@@ -82,7 +82,7 @@ export const routeRequest = async (
 	} catch (error) {
 		console.error("❌ [routeRequest] 에러 발생:", error);
 		return {
-			description: "요청을 라우팅하는 중 오류가 발생했습니다.",
+			messages: [new AIMessage("요청을 라우팅하는 중 오류가 발생했습니다.")],
 		};
 	}
 };
@@ -128,7 +128,6 @@ export const analyzeAuthorizedPersonRequest = async (
 
 		const returnState = {
 			search_criteria: {
-				...state.search_criteria,
 				name: result.name,
 			},
 			update_data: result.update_data,
@@ -141,7 +140,7 @@ export const analyzeAuthorizedPersonRequest = async (
 	} catch (error) {
 		console.error("❌ [analyzeAuthorizedPerson] 에러 발생:", error);
 		return {
-			description: "수권자 정보 분석 중 오류가 발생했습니다.",
+			messages: [new AIMessage("수권자 정보 분석 중 오류가 발생했습니다.")],
 		};
 	}
 };
@@ -203,7 +202,7 @@ export const analyzePaymentAccountRequest = async (
 	} catch (error) {
 		console.error("❌ [analyzePaymentAccount] 에러 발생:", error);
 		return {
-			description: "결제계좌 정보 분석 중 오류가 발생했습니다.",
+			messages: [new AIMessage("결제계좌 정보 분석 중 오류가 발생했습니다.")],
 		};
 	}
 };
@@ -252,7 +251,7 @@ export const analyzeOfficialSealRequest = async (
 	} catch (error) {
 		console.error("❌ [analyzeOfficialSeal] 에러 발생:", error);
 		return {
-			description: "인감/서명 정보 분석 중 오류가 발생했습니다.",
+			messages: [new AIMessage("인감/서명 정보 분석 중 오류가 발생했습니다.")],
 		};
 	}
 };
@@ -270,8 +269,7 @@ export const executeUpdate = async (
 	if (!state.update_type || !state.search_criteria || !state.update_data) {
 		console.warn("⚠️ [executeUpdate] 필수 정보 부족");
 		return {
-			...state,
-			description: "업데이트에 필요한 정보가 부족합니다.",
+			messages: [new AIMessage("업데이트에 필요한 정보가 부족합니다.")],
 		};
 	}
 
@@ -288,9 +286,7 @@ export const executeUpdate = async (
 			console.error("❌ [executeUpdate] 회사를 찾을 수 없음:", company_name);
 			return {
 				...state,
-				description: `회사 '${company_name}'을(를) 찾을 수 없습니다.`,
 				messages: [
-					...state.messages,
 					new AIMessage(`회사 '${company_name}'을(를) 찾을 수 없습니다.`),
 				],
 			};
@@ -461,11 +457,10 @@ export const executeUpdate = async (
 		}
 
 		const finalResult = {
-			description: resultMessage,
-			messages: [...state.messages, new AIMessage(resultMessage)],
+			messages: [new AIMessage(resultMessage)],
 		};
 
-		console.log("📤 [executeUpdate] 최종 결과:", finalResult.description);
+		console.log("📤 [executeUpdate] 최종 결과:", resultMessage);
 		console.log("🏁 [executeUpdate] 업데이트 실행 완료");
 
 		return finalResult;
@@ -473,8 +468,7 @@ export const executeUpdate = async (
 		console.error("❌ [executeUpdate] 예외 발생:", error);
 		const errorMessage = `데이터베이스 업데이트 중 오류가 발생했습니다: ${error}`;
 		return {
-			description: errorMessage,
-			messages: [...state.messages, new AIMessage(errorMessage)],
+			messages: [new AIMessage(errorMessage)],
 		};
 	}
 };

@@ -18,7 +18,7 @@ const SUB_AGENTS: SubAgentConfig[] = [
 			messages: state.messages,
 		}),
 		outputMapper: (state) => ({
-			description: state.description,
+			messages: state.messages,
 			attachments: [state.attachment],
 		}),
 	},
@@ -34,7 +34,7 @@ const SUB_AGENTS: SubAgentConfig[] = [
 			filepaths: state.input_filepaths,
 		}),
 		outputMapper: (state) => ({
-			description: state.description,
+			messages: state.messages,
 			attachments: [],
 		}),
 	},
@@ -76,7 +76,7 @@ export const createRouterAgent = (subAgents: SubAgentConfig[] = SUB_AGENTS) => {
 				content: state.description, // FileReader의 결과를 content로 전달
 			}),
 			outputMapper: (state) => ({
-				description: state.description,
+				messages: state.messages,
 				attachments: [],
 			}),
 		}),

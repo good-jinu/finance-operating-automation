@@ -84,7 +84,7 @@ app.prepare().then(() => {
 						if (values && typeof values === "object" && "messages" in values) {
 							const messages = values.messages;
 							if (Array.isArray(messages)) {
-								for (const msg of messages) {
+								for (const msg of messages as any) {
 									if (msg?.content && typeof msg.content === "string") {
 										const content = msg.content;
 

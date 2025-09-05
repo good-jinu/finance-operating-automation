@@ -8,7 +8,7 @@
 		"build": "next build",
 		"start": "NODE_ENV=production npx tsx server.ts",
 		"lint": "next lint",
-		"test": "vitest"
+		"test": "vitest run"
 	},
 	"dependencies": {
 		"@finance-operating-automation/core": "workspace:*",

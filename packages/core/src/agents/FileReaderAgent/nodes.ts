@@ -1,4 +1,6 @@
 import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+import { AIMessage } from "@langchain/core/messages";
 import { createChatModel } from "../../llm";
 import { FILE_READER_PROMPT } from "./prompts";
 import type { FileReaderState } from "./schemas";
@@ -13,7 +15,19 @@ export const extractFileNode = async (
 		if (!filepath) {
 			continue;
 		}
-		const loader = new DocxLoader(filepath);
+
+		// 파일 확장자에 따라 적절한 로더 선택
+		const fileExtension = filepath.toLowerCase().split(".").pop();
+		let loader: DocxLoader | PDFLoader;
+
+		if (fileExtension === "pdf") {
+			loader = new PDFLoader(filepath);
+		} else if (fileExtension === "docx") {
+			loader = new DocxLoader(filepath);
+		} else {
+			console.warn(`지원하지 않는 파일 형식: ${fileExtension}`);
+			continue;
+		}
 
 		docs.push(await loader.load());
 	}
@@ -38,6 +52,6 @@ export const summarizeContentNode = async (
 	console.log(summary);
 
 	return {
-		description: summary.content.toString(),
+		messages: [new AIMessage(summary.content.toString())],
 	};
 };

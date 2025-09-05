@@ -13,7 +13,7 @@ export interface SubAgentConfig {
 	outputMapper?: (
 		// biome-ignore lint:suspicious/noExplicitAny
 		state: any,
-	) => Pick<RouterState, "description" | "attachments">;
+	) => Pick<RouterState, "messages" | "attachments">;
 }
 
 export const RouteDecisionSchema = z.object({

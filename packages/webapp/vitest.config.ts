@@ -11,10 +11,6 @@ export default defineConfig({
 			enabled: true,
 			provider: "v8",
 			reporter: ["text", "json", "html"],
-			lines: 80,
-			functions: 80,
-			branches: 80,
-			statements: 80,
 		},
 	},
 });

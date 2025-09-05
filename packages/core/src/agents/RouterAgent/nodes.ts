@@ -25,7 +25,7 @@ export const createRouteNode = (subAgents: SubAgentConfig[]) => {
 		const message =
 			state.messages[state.messages.length - 1].content.toString();
 		const routerPrompt = createRouterPrompt(
-			subAgents,
+			subAgents.filter((agent) => agent.name !== "FileReaderToDatabase"),
 			state.input_filepaths[0],
 		);
 
@@ -76,7 +76,10 @@ export const createMailNode = async (
 ): Promise<Partial<RouterState>> => {
 	const userMessage =
 		state.messages[state.messages.length - 1].content.toString();
-	const agentResult = state.mail_body || "처리 완료";
+	const agentWorkHistory = state.messages
+		.slice(1) // 첫 번째 사용자 메시지 제외
+		.map((msg) => msg.content)
+		.join("\n");
 	const attachments =
 		state.attachments.length > 0 ? state.attachments.join(", ") : "없음";
 	const mailModel = model.withStructuredOutput(MailWriterSchema);
@@ -84,7 +87,7 @@ export const createMailNode = async (
 	const mailResponse = await mailModel.invoke(
 		await MAIL_CREATION_PROMPT.invoke({
 			user_message: userMessage,
-			agent_result: agentResult,
+			agent_result: agentWorkHistory,
 			attachments: attachments,
 		}),
 	);

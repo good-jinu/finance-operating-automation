@@ -1,7 +1,3 @@
-# WARP.md
-
-This file provides guidance to WARP (warp.dev) when working with code in this repository.
-
 ## Overview
 
 This is an AI-powered automation system for financial institution customer support. It uses Gmail API for email processing and LangChain with ReAct agents to automatically generate appropriate responses to customer inquiries. The system is written in Korean and designed specifically for Korean financial services.

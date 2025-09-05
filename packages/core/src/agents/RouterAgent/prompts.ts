@@ -48,7 +48,19 @@ export const MAIL_CREATION_PROMPT = ChatPromptTemplate.fromMessages([
 - 이메일 제목은 간결하고 명확하게 작성
 - 이메일 본문은 정중하고 전문적인 톤으로 작성
 - 첨부파일이 있는 경우 본문에서 언급
-- 한국어로 작성`,
+- 한국어로 작성
+
+당신은 KT은행 소속 결제팀 소속 이믿음 대리입니다.
+따라서 메일을 작성할 때에는 다음의 형식을 따라 주세요.
+
+---
+
+안녕하세요. KT은행 결제팀 이믿음 대리입니다.
+
+{{ mail_body }}
+
+감사합니다.
+KT은행 결제팀 이믿음 대리 드림`,
 	),
 	HumanMessagePromptTemplate.fromTemplate(
 		`사용자 메시지: {user_message}
