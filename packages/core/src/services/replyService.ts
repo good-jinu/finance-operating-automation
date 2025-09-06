@@ -4,11 +4,13 @@ import { findAttachmentsByMessageId } from "../models/Attachment";
 import { findGmailMessagesByIds } from "../models/GmailMessage";
 import {
 	countReplyMails,
+	countReplyMailsByMessageId,
 	countUnsentReplyMails,
 	createReplyMail,
 	deleteReplyMail,
 	findAllReplyMails,
 	findReplyMailById,
+	findReplyMailsByMessageId,
 	findReplyMailsByStatus,
 	updateReplyMailContent,
 	updateReplyMailSentStatus,
@@ -226,21 +228,36 @@ export async function sendReplyMail(replyMailId: number): Promise<boolean> {
 	}
 }
 
+interface GetReplyMailsOptions {
+	unsentOnly?: boolean;
+	limit?: number;
+	messageId?: string;
+}
+
 /**
- * 답변 메일 목록 조회 (전송 상태별)
+ * 답변 메일 목록 조회
  */
-export function getReplyMails(unsentOnly: boolean = false, limit: number = 50) {
+export function getReplyMails(options: GetReplyMailsOptions = {}) {
+	const { unsentOnly = false, limit = 50, messageId } = options;
+
+	if (messageId) {
+		return {
+			replyMails: findReplyMailsByMessageId(messageId, limit),
+			totalCount: countReplyMailsByMessageId(messageId),
+		};
+	}
+
 	if (unsentOnly) {
 		return {
 			replyMails: findReplyMailsByStatus(false, limit),
 			totalCount: countUnsentReplyMails(),
 		};
-	} else {
-		return {
+	}
+
+	return {
 			replyMails: findAllReplyMails(limit),
 			totalCount: countReplyMails(),
-		};
-	}
+	};
 }
 
 /**

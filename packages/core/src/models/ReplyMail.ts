@@ -84,6 +84,25 @@ export function findAllReplyMails(limit: number = 50): ReplyMailWithOriginal[] {
 	return stmt.all(limit) as ReplyMailWithOriginal[];
 }
 
+export function findReplyMailsByMessageId(
+	messageId: string,
+	limit: number = 50,
+): ReplyMailWithOriginal[] {
+	const stmt = db.prepare(`
+		SELECT 
+			rm.*,
+			gm.sender as original_sender,
+			gm.subject as original_subject,
+			gm.body as original_body
+		FROM reply_mails rm
+		INNER JOIN gmail_messages gm ON rm.original_message_id = gm.message_id
+		WHERE rm.original_message_id = ?
+		ORDER BY rm.created_at DESC
+		LIMIT ?
+	`);
+	return stmt.all(messageId, limit) as ReplyMailWithOriginal[];
+}
+
 export function updateReplyMailSentStatus(
 	id: number,
 	is_sent: boolean,
@@ -135,5 +154,13 @@ export function countUnsentReplyMails(): number {
 		"SELECT COUNT(*) as count FROM reply_mails WHERE is_sent = 0",
 	);
 	const result = stmt.get() as { count: number };
+	return result.count;
+}
+
+export function countReplyMailsByMessageId(messageId: string): number {
+	const stmt = db.prepare(
+		"SELECT COUNT(*) as count FROM reply_mails WHERE original_message_id = ?",
+	);
+	const result = stmt.get(messageId) as { count: number };
 	return result.count;
 }
