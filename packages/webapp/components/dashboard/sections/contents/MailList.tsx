@@ -1,18 +1,17 @@
 "use client";
 
+import type { GmailMessage as Mail } from "@finance-operating-automation/core/models";
 import { RefreshCw } from "lucide-react";
-import { useEffect, useId } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useMails } from "@/hooks/useMails";
 import { useReplyMails } from "@/hooks/useReplyMails";
+import { MailDetailDialog } from "../../dialogs/MailDetailDialog";
 import { MailItem } from "./MailItem";
 
 interface MailListProps {
 	isUnreadOnly: boolean;
 	onToggleUnreadOnly: () => void;
-	selectedMailIds: number[];
-	onSelectedMailIdsChange: (ids: number[]) => void;
 	isUnsentOnly: boolean;
 	onToggleUnsentOnly: () => void;
 }
@@ -20,11 +19,10 @@ interface MailListProps {
 export function MailList({
 	isUnreadOnly,
 	onToggleUnreadOnly,
-	selectedMailIds,
-	onSelectedMailIdsChange,
 	isUnsentOnly,
 	onToggleUnsentOnly,
 }: MailListProps) {
+	const [selectedMail, setSelectedMail] = useState<Mail | null>(null);
 	const { data: mailsData, isLoading, error } = useMails(isUnreadOnly);
 	const {
 		data: replyMailsData,
@@ -34,52 +32,21 @@ export function MailList({
 
 	const mails = mailsData?.data || [];
 	const replyMails = replyMailsData?.data || [];
-	const selectAllId = useId();
-
-	useEffect(() => {
-		onSelectedMailIdsChange([]);
-	}, [onSelectedMailIdsChange]);
-
-	const handleSelectAll = (checked: boolean) => {
-		if (checked) {
-			onSelectedMailIdsChange(mails.map((mail) => mail.id ?? NaN));
-		} else {
-			onSelectedMailIdsChange([]);
-		}
-	};
-
-	const handleSelectOne = (id: number, checked: boolean) => {
-		if (checked) {
-			onSelectedMailIdsChange([...selectedMailIds, id]);
-		} else {
-			onSelectedMailIdsChange(
-				selectedMailIds.filter((mailId) => mailId !== id),
-			);
-		}
-	};
-
-	const areAllSelected =
-		mails.length > 0 && selectedMailIds.length === mails.length;
 
 	const isLoadingAny = isLoading || isReplyMailsLoading;
 	const hasError = error || replyMailsError;
 
+	const handleMailClick = (mail: Mail) => {
+		setSelectedMail(mail);
+	};
+
+	const handleDialogClose = () => {
+		setSelectedMail(null);
+	};
+
 	return (
 		<div>
-			<div className="flex items-center justify-between mb-3">
-				<div className="flex items-center gap-2">
-					<Checkbox
-						id={selectAllId}
-						checked={areAllSelected}
-						onCheckedChange={handleSelectAll}
-						disabled={mails.length === 0}
-						className="border border-neutral-500"
-					/>
-					<label htmlFor="select-all" className="text-sm font-medium">
-						{areAllSelected ? "전체 선택 해제" : "전체 선택"} (
-						{selectedMailIds.length})
-					</label>
-				</div>
+			<div className="flex items-center justify-end mb-3">
 				<div className="flex items-center gap-2">
 					<Button
 						variant="outline"
@@ -119,10 +86,7 @@ export function MailList({
 							<MailItem
 								key={mail.id}
 								mail={mail}
-								isSelected={selectedMailIds.includes(mail.id ?? NaN)}
-								onSelectChange={(checked) =>
-									handleSelectOne(mail.id ?? NaN, checked)
-								}
+								onClick={() => handleMailClick(mail)}
 								replyMails={replyMails.filter(
 									(reply) => reply.original_message_id === mail.message_id,
 								)}
@@ -130,6 +94,14 @@ export function MailList({
 						))}
 					</div>
 				</div>
+			)}
+
+			{selectedMail && (
+				<MailDetailDialog
+					mail={selectedMail}
+					open={!!selectedMail}
+					onClose={handleDialogClose}
+				/>
 			)}
 		</div>
 	);

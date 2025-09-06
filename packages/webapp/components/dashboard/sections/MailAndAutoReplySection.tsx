@@ -11,13 +11,11 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { useMailSync } from "@/hooks/useMailSync";
-import { AIReplyGenerationControl } from "./contents/AIReplyGenerationControl";
 import { MailList } from "./contents/MailList";
 
 export default function MailAndAutoReplySection() {
 	const [isUnreadOnly, setIsUnreadOnly] = useState(false);
 	const [isUnsentOnly, setIsUnsentOnly] = useState(true);
-	const [selectedMailIds, setSelectedMailIds] = useState<number[]>([]);
 
 	// 메일 동기화
 	const syncMailsMutation = useMailSync();
@@ -52,15 +50,10 @@ export default function MailAndAutoReplySection() {
 				</div>
 			</CardHeader>
 			<CardContent className="space-y-4">
-				{/* AI Reply Generation Control Section */}
-				<AIReplyGenerationControl selectedMailIds={selectedMailIds} />
-
 				{/* Unified Mail List with Reply Mails */}
 				<MailList
 					isUnreadOnly={isUnreadOnly}
 					onToggleUnreadOnly={() => setIsUnreadOnly(!isUnreadOnly)}
-					selectedMailIds={selectedMailIds}
-					onSelectedMailIdsChange={setSelectedMailIds}
 					isUnsentOnly={isUnsentOnly}
 					onToggleUnsentOnly={() => setIsUnsentOnly(!isUnsentOnly)}
 				/>

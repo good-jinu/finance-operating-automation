@@ -10,24 +10,17 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useAttachments } from "@/hooks/useAttachments";
 import type { GmailMessage } from "@/types";
 import { ReplyMailItem } from "./ReplyMailItem";
 
 interface MailItemProps {
 	mail: GmailMessage;
-	isSelected?: boolean;
-	onSelectChange?: (selected: boolean) => void;
+	onClick: () => void;
 	replyMails?: ReplyMailWithOriginal[];
 }
 
-export function MailItem({
-	mail,
-	isSelected = false,
-	onSelectChange,
-	replyMails = [],
-}: MailItemProps) {
+export function MailItem({ mail, onClick, replyMails = [] }: MailItemProps) {
 	const [showAttachments, setShowAttachments] = useState(false);
 	const [showReplies, setShowReplies] = useState(false);
 	const {
@@ -83,17 +76,10 @@ export function MailItem({
 
 	return (
 		<div
-			className={`flex items-start gap-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors ${
-				isSelected ? "border-primary/50 bg-primary/5" : ""
-			}`}
-			role={"listbox"}
-			onKeyUp={() => onSelectChange?.(!isSelected)}
+			className="flex items-start gap-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
+			onClick={onClick}
+			aria-hidden="true"
 		>
-			<Checkbox
-				checked={isSelected}
-				onCheckedChange={(checked) => onSelectChange?.(!!checked)}
-				className="mt-1 border border-neutral-500"
-			/>
 			<div className="flex-1 min-w-0">
 				<div className="flex items-center gap-2 mb-1">
 					<p className="text-sm font-medium truncate">{mail.sender}</p>

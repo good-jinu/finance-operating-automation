@@ -33,30 +33,43 @@ interface DeleteReplyMailResponse {
 	data: { deleted: boolean };
 }
 
-export function useReplyMails(unsentOnly: boolean = false) {
+export function useReplyMails(unsentOnly: boolean = false, messageId?: string) {
+	const queryKey = messageId
+		? ["reply-mails", messageId]
+		: ["reply-mails", unsentOnly];
+
 	return useQuery<ReplyMailListResponse>({
-		queryKey: ["reply-mails", unsentOnly],
+		queryKey,
 		queryFn: async () => {
-			const response = await fetch(`/api/reply-mails?unsentOnly=${unsentOnly}`);
+			const url = messageId
+				? `/api/reply-mails?messageId=${messageId}`
+				: `/api/reply-mails?unsentOnly=${unsentOnly}`;
+			const response = await fetch(url);
 			if (!response.ok) {
 				throw new Error("Failed to fetch reply mails");
 			}
 			return response.json();
 		},
+		refetchOnWindowFocus: true,
 	});
 }
 
 export function useGenerateReplies() {
 	const queryClient = useQueryClient();
 
-	return useMutation<GenerateRepliesResponse, Error, { mailIds: number[] }>({
+	return useMutation<
+		GenerateRepliesResponse,
+		Error,
+		{ mailIds: number | number[] }
+	>({
 		mutationFn: async ({ mailIds }) => {
+			const ids = Array.isArray(mailIds) ? mailIds : [mailIds];
 			const response = await fetch("/api/reply-mails/generate", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ mailIds }),
+				body: JSON.stringify({ mailIds: ids }),
 			});
 			if (!response.ok) {
 				const errorData = await response
@@ -66,10 +79,15 @@ export function useGenerateReplies() {
 			}
 			return response.json();
 		},
-		onSuccess: () => {
-			// 답변 메일 목록 새로고침
-			queryClient.invalidateQueries({ queryKey: ["reply-mails"] });
-			// 원본 메일 목록도 새로고침하여 '답변 생성됨' 상태 등을 업데이트 할 수 있도록 함
+		onSuccess: (data, variables) => {
+			const ids = Array.isArray(variables.mailIds)
+				? variables.mailIds
+				: [variables.mailIds];
+			// Invalidate queries for each mailId to refetch replies
+			ids.forEach((id) => {
+				queryClient.invalidateQueries({ queryKey: ["reply-mails", id] });
+			});
+			queryClient.invalidateQueries({ queryKey: ["reply-mails", false] });
 			queryClient.invalidateQueries({ queryKey: ["mails"] });
 		},
 	});
