@@ -10,7 +10,10 @@
 		"build-and-start": "pnpm build && pnpm start",
 		"check": "biome check --write",
 		"test": "pnpm -r test",
-		"coverage": "pnpm -r test --coverage"
+		"coverage": "pnpm -r test --coverage",
+		"seed-demo": "npx tsx packages/core/src/scripts/seedDemoData.ts",
+		"check-demo": "npx tsx packages/core/src/scripts/checkDemoData.ts",
+		"reset-db": "rm -f .storage/database.db && pnpm seed-demo"
 	},
 	"keywords": [],
 	"author": "",
