@@ -9,9 +9,9 @@ import { Toaster } from "@/components/ui/sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function DatabaseTab() {
-	const [tableNames, setTableNames] = useState<{ name: string; label: string }[]>(
-		[],
-	);
+	const [tableNames, setTableNames] = useState<
+		{ name: string; label: string }[]
+	>([]);
 	const [activeTable, setActiveTable] = useState<string>("");
 	const [tableData, setTableData] = useState<any[]>([]);
 	const [isLoading, setIsLoading] = useState(false);

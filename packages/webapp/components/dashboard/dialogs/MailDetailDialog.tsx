@@ -14,10 +14,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import {
-	useGenerateReplies,
-	useReplyMails,
-} from "@/hooks/useReplyMails";
+import { useGenerateReplies, useReplyMails } from "@/hooks/useReplyMails";
 import { ReplyMailItem } from "../sections/contents/ReplyMailItem";
 
 interface MailDetailDialogProps {

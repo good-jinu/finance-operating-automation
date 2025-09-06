@@ -6,12 +6,6 @@ import {
 	updateAuthorizedPerson,
 } from "../models/AuthorizedPerson";
 import {
-	createCustomer,
-	deleteCustomer,
-	findAllCustomers,
-	updateCustomer,
-} from "../models/Customer";
-import {
 	createCustomerCompany,
 	deleteCustomerCompany,
 	findAllCustomerCompanies,
@@ -49,7 +43,6 @@ vi.mock("../database", () => ({
 }));
 
 vi.mock("../models/CustomerCompany");
-vi.mock("../models/Customer");
 vi.mock("../models/AuthorizedPerson");
 vi.mock("../models/PaymentAccount");
 vi.mock("../models/OfficialSeal");
@@ -63,8 +56,6 @@ describe("databaseService", () => {
 		it("should call the correct findAll function based on table name", async () => {
 			await getTableData("customers_company");
 			expect(findAllCustomerCompanies).toHaveBeenCalled();
-			await getTableData("customers");
-			expect(findAllCustomers).toHaveBeenCalled();
 			await getTableData("authorized_person");
 			expect(findAllAuthorizedPersons).toHaveBeenCalled();
 			await getTableData("payment_account");
@@ -97,8 +88,6 @@ describe("databaseService", () => {
 			const data = { name: "test" };
 			await createTableRow("customers_company", data);
 			expect(createCustomerCompany).toHaveBeenCalledWith(data);
-			await createTableRow("customers", data);
-			expect(createCustomer).toHaveBeenCalledWith(data);
 			await createTableRow("authorized_person", data);
 			expect(createAuthorizedPerson).toHaveBeenCalledWith(data);
 			await createTableRow("payment_account", data);
@@ -119,8 +108,6 @@ describe("databaseService", () => {
 			const data = { name: "test" };
 			await updateTableRow("customers_company", 1, data);
 			expect(updateCustomerCompany).toHaveBeenCalledWith(1, data);
-			await updateTableRow("customers", 1, data);
-			expect(updateCustomer).toHaveBeenCalledWith(1, data);
 			await updateTableRow("authorized_person", 1, data);
 			expect(updateAuthorizedPerson).toHaveBeenCalledWith(1, data);
 			await updateTableRow("payment_account", 1, data);
@@ -140,8 +127,6 @@ describe("databaseService", () => {
 		it("should call the correct delete function based on table name", async () => {
 			await deleteTableRow("customers_company", 1);
 			expect(deleteCustomerCompany).toHaveBeenCalledWith(1);
-			await deleteTableRow("customers", 1);
-			expect(deleteCustomer).toHaveBeenCalledWith(1);
 			await deleteTableRow("authorized_person", 1);
 			expect(deleteAuthorizedPerson).toHaveBeenCalledWith(1);
 			await deleteTableRow("payment_account", 1);

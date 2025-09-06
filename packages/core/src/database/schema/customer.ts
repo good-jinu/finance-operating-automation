@@ -12,20 +12,6 @@ export const createCustomerTables = (db: Database) => {
 		)
 	`);
 
-	// 고객 테이블
-	db.exec(`
-		CREATE TABLE IF NOT EXISTS customers
-		(
-			id         INTEGER PRIMARY KEY AUTOINCREMENT,
-			name       TEXT NOT NULL,
-			email      TEXT UNIQUE NOT NULL,
-			company_id INTEGER,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (company_id) REFERENCES customers_company (id)
-		)
-	`);
-
 	// 수권자 테이블
 	db.exec(`
 		CREATE TABLE IF NOT EXISTS authorized_person

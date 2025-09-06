@@ -6,12 +6,6 @@ import {
 	updateAuthorizedPerson,
 } from "../models/AuthorizedPerson";
 import {
-	createCustomer,
-	deleteCustomer,
-	findAllCustomers,
-	updateCustomer,
-} from "../models/Customer";
-import {
 	createCustomerCompany,
 	deleteCustomerCompany,
 	findAllCustomerCompanies,
@@ -34,8 +28,6 @@ export async function getTableData(tableName: string): Promise<unknown[]> {
 	switch (tableName) {
 		case "customers_company":
 			return findAllCustomerCompanies();
-		case "customers":
-			return findAllCustomers();
 		case "authorized_person":
 			return findAllAuthorizedPersons();
 		case "payment_account":
@@ -64,8 +56,6 @@ export async function createTableRow(
 	switch (tableName) {
 		case "customers_company":
 			return createCustomerCompany(data);
-		case "customers":
-			return createCustomer(data);
 		case "authorized_person":
 			return createAuthorizedPerson(data);
 		case "payment_account":
@@ -85,8 +75,6 @@ export async function updateTableRow(
 	switch (tableName) {
 		case "customers_company":
 			return updateCustomerCompany(id, data);
-		case "customers":
-			return updateCustomer(id, data);
 		case "authorized_person":
 			return updateAuthorizedPerson(id, data);
 		case "payment_account":
@@ -105,8 +93,6 @@ export async function deleteTableRow(
 	switch (tableName) {
 		case "customers_company":
 			return deleteCustomerCompany(id);
-		case "customers":
-			return deleteCustomer(id);
 		case "authorized_person":
 			return deleteAuthorizedPerson(id);
 		case "payment_account":
