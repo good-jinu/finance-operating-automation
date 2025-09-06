@@ -13,7 +13,7 @@ This is a pnpm monorepo with two main packages:
 The system follows a **multi-agent architecture** using LangChain's LangGraph:
 
 1. **RouterAgent**: Main orchestrator that routes requests to appropriate sub-agents
-2. **ChatAgent**: Interactive conversational agent using createReactAgent with custom tools
+2. **ChatAgent**: Interactive conversational agent using createReactAgent with custom tools and streaming capabilities
 3. **GuideProviderAgent**: Provides procedural guides for common tasks
 4. **FileReaderAgent**: Reads and processes document files 
 5. **CustomerDatabaseAgent**: Updates customer database with processed information
@@ -58,6 +58,8 @@ pnpm check
 # Check specific files
 biome check <file-path>
 ```
+
+The project uses **Biome 2.2.2** for fast linting and formatting instead of ESLint/Prettier.
 
 ### Testing Individual Components
 ```bash
@@ -105,12 +107,16 @@ npx tsx packages/core/src/services/databaseService.ts
 
 ### Agent Workflow Pattern
 
-Each agent follows a consistent structure:
-- `workflow.ts`: LangGraph state machine definition
-- `nodes.ts`: Individual processing nodes
-- `schemas.ts`: Type definitions and state annotations  
-- `prompts.ts`: LLM prompt templates
-- `AgentName.ts`: Public interface functions
+Each LangGraph-based agent follows a consistent structure:
+- `workflow.ts`: LangGraph state machine definition with StateGraph
+- `nodes.ts`: Individual processing nodes for workflow steps
+- `schemas.ts`: Type definitions and state annotations using Annotation
+- `prompts.ts`: LLM prompt templates with Korean language support
+- `AgentName.ts`: Public interface functions (runAgentName, streamAgentName)
+
+#### Current Sub-Agents in RouterAgent
+1. **GuideProvider**: Provides procedural guides for authority_change, payment_account_change, seal_sign_change
+2. **FileReaderToDatabase**: Processes uploaded files and updates customer database automatically
 
 ### ChatAgent Architecture
 
@@ -120,6 +126,13 @@ The ChatAgent uses a different pattern based on **createReactAgent**:
 - **ChatAgent.ts**: Main agent using createReactAgent with MemorySaver
 - **test.ts**: Integration tests for all tools
 - **examples.ts**: Usage examples and interactive mode
+
+#### ChatAgent Functions
+1. **invokeChatAgent()**: Single request processing with thread support
+2. **continueChatAgent()**: Continue conversation in existing thread
+3. **streamChatAgent()**: Streaming responses for real-time interaction
+4. **streamContinueChatAgent()**: Streaming continuation of existing conversation
+5. **resetChatAgent()**: Clear conversation history for a thread
 
 #### Available Tools
 1. **gmail_list**: Gmail message list retrieval
@@ -131,7 +144,13 @@ The ChatAgent uses a different pattern based on **createReactAgent**:
 
 #### Usage Pattern
 ```typescript
-import { invokeChatAgent, continueChatAgent } from './agents/ChatAgent/ChatAgent';
+import { 
+  invokeChatAgent, 
+  continueChatAgent, 
+  streamChatAgent, 
+  streamContinueChatAgent,
+  resetChatAgent 
+} from './agents/ChatAgent/ChatAgent';
 
 // Single request
 const response = await invokeChatAgent("ABC회사의 수권자 목록을 보여주세요.");
@@ -141,6 +160,14 @@ const followUp = await continueChatAgent(
   "김수권 수권자의 전화번호를 변경해주세요.", 
   "session-id"
 );
+
+// Streaming response
+for await (const chunk of streamChatAgent("실시간 스트리밍 요청", { thread_id: "stream-session" })) {
+  console.log(chunk);
+}
+
+// Reset conversation history
+await resetChatAgent("session-id");
 ```
 
 ## Configuration
