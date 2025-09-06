@@ -137,6 +137,42 @@ export function findGmailMessagesByIds(ids: number[]): GmailMessage[] {
 }
 
 /**
+ * 특정 날짜 이후의 메일 목록을 조회합니다.
+ * @param sinceDate YYYY-MM-DD HH:mm:ss 형식의 날짜 문자열
+ * @param limit 최대 조회할 메일 수
+ */
+export function findGmailMessagesSinceDate(
+	sinceDate: string,
+	limit: number = 50,
+): GmailMessage[] {
+	const stmt = db.prepare(`
+		SELECT * FROM gmail_messages 
+		WHERE datetime(created_at) >= datetime(?) 
+		ORDER BY internal_date DESC, created_at DESC 
+		LIMIT ?
+	`);
+	return stmt.all(sinceDate, limit) as GmailMessage[];
+}
+
+/**
+ * 특정 날짜 이후의 읽지 않은 메일 목록을 조회합니다.
+ * @param sinceDate YYYY-MM-DD HH:mm:ss 형식의 날짜 문자열
+ * @param limit 최대 조회할 메일 수
+ */
+export function findUnreadGmailMessagesSinceDate(
+	sinceDate: string,
+	limit: number = 50,
+): GmailMessage[] {
+	const stmt = db.prepare(`
+		SELECT * FROM gmail_messages 
+		WHERE is_unread = 1 AND datetime(created_at) >= datetime(?) 
+		ORDER BY internal_date DESC, created_at DESC 
+		LIMIT ?
+	`);
+	return stmt.all(sinceDate, limit) as GmailMessage[];
+}
+
+/**
  * DB의 gmail_messages에서 Gmail API message_id 가져오기
  */
 export function getOriginalGmailMessageId(dbMessageId: number): string | null {
