@@ -2,19 +2,24 @@
  * 빌드 전 필요한 디렉토리들을 생성하는 스크립트
  */
 
-const fs = require("node:fs");
-const path = require("node:path");
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 // 생성해야 할 디렉토리들
-const directories = [".storage", ".storage/files"];
+const directories: string[] = [".storage", ".storage/files"];
 
-function ensureDirectories() {
+// __dirname 대체 (ES 모듈에서)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+function ensureDirectories(): void {
 	console.log("🔧 필요한 디렉토리들을 확인하고 생성 중...");
 
-	let createdCount = 0;
+	let createdCount: number = 0;
 
 	for (const dir of directories) {
-		const fullPath = path.join(__dirname, "..", dir);
+		const fullPath: string = path.join(__dirname, "..", dir);
 
 		try {
 			if (!fs.existsSync(fullPath)) {
@@ -24,8 +29,9 @@ function ensureDirectories() {
 			} else {
 				console.log(`📁 디렉토리 이미 존재함: ${dir}`);
 			}
-		} catch (error) {
-			console.error(`❌ 디렉토리 생성 실패 (${dir}):`, error.message);
+		} catch (error: unknown) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			console.error(`❌ 디렉토리 생성 실패 (${dir}):`, errorMessage);
 			process.exit(1);
 		}
 	}

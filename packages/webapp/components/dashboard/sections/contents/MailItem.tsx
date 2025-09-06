@@ -76,7 +76,7 @@ export function MailItem({ mail, onClick, replyMails = [] }: MailItemProps) {
 
 	return (
 		<div
-			className="flex items-start gap-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
+			className="flex items-start gap-3 p-3 rounded-lg border bg-white hover:bg-muted/90 cursor-pointer transition-colors"
 			onClick={onClick}
 			aria-hidden="true"
 		>

@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "npx tsx server.ts",
-		"prebuild": "node scripts/ensure-directories.js",
+		"prebuild": "npx tsx scripts/ensure-directories.ts",
 		"build": "next build",
 		"start": "NODE_ENV=production npx tsx server.ts",
 		"lint": "next lint",

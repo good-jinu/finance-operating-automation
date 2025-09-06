@@ -67,10 +67,15 @@ export async function* streamGenerateReply(
 	let mailAttachments: string[] = [];
 
 	for await (const chunk of agentStream) {
+		console.log("Agent chunk:", chunk);
 		const nodeName = Object.keys(chunk)[0];
 		const nodeOutput = Object.values(chunk)[0] as any;
 
 		let statusMessage = `에이전트 [${nodeName}] 실행 중...`;
+
+		if (nodeName.includes("Provider")) {
+			mailAttachments = nodeOutput.attachments ?? [];
+		}
 
 		if (nodeOutput?.messages) {
 			const lastMessage = nodeOutput.messages.at(-1);
@@ -80,7 +85,6 @@ export async function* streamGenerateReply(
 		} else if (nodeName === "create_mail") {
 			mailTitle = nodeOutput.mail_title;
 			mailBody = nodeOutput.mail_body;
-			mailAttachments = nodeOutput.attachments ?? [];
 			statusMessage = "메일 초안이 생성되었습니다.";
 		}
 
@@ -106,7 +110,7 @@ export async function* streamGenerateReply(
 		const service = buildGmailService(creds);
 		const gmailClient = new GmailClient(service);
 		await gmailClient.markEmailAsRead(message.message_id);
-	} catch (error) {
+	} catch (error: any) {
 		yield {
 			status: "warning",
 			message: `메일을 읽음으로 처리하는 데 실패했습니다: ${error.message}`,
