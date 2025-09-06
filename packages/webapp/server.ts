@@ -4,6 +4,7 @@ import { streamChatAgent } from "@finance-operating-automation/core/agents";
 import {
 	getChatHistory,
 	saveChatMessage,
+	streamGenerateReply,
 } from "@finance-operating-automation/core/services";
 import next from "next";
 import { Server } from "socket.io";
@@ -147,6 +148,28 @@ app.prepare().then(() => {
 
 		socket.on("disconnect", () => {
 			console.log(`[Socket.IO] Client disconnected: ${socket.id}`);
+		});
+
+		socket.on("generate-reply", async ({ mailId }: { mailId: number }) => {
+			console.log(`[Socket.IO] Received generate-reply for mailId: ${mailId}`);
+
+			try {
+				const replyStream = streamGenerateReply(mailId);
+
+				for await (const progress of replyStream) {
+					socket.emit("agent-status", { message: progress.message });
+				}
+
+				socket.emit("generation-complete");
+			} catch (error) {
+				console.error("[Agent] Error processing generate-reply:", error);
+				socket.emit("generation-error", {
+					message:
+						error instanceof Error
+							? error.message
+							: "AI 답변 생성 중 오류가 발생했습니다.",
+				});
+			}
 		});
 	});
 

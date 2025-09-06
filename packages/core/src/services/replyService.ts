@@ -1,7 +1,10 @@
 import path from "node:path";
-import { runRouterAgent } from "../agents";
+import { runRouterAgent, streamRouterAgent } from "../agents";
 import { findAttachmentsByMessageId } from "../models/Attachment";
-import { findGmailMessagesByIds } from "../models/GmailMessage";
+import {
+	findGmailMessageById,
+	findGmailMessagesByIds,
+} from "../models/GmailMessage";
 import {
 	countReplyMails,
 	countReplyMailsByMessageId,
@@ -19,7 +22,102 @@ import { FILE_PATH } from "../utils/config";
 import { buildGmailService, getCredentials } from "./auth";
 import { GmailClient } from "./gmailClient";
 
+export interface GenerateReplyStreamProgress {
+	status: string;
+	message: string;
+	data?: any;
+}
+
+export async function* streamGenerateReply(
+	mailId: number,
+): AsyncGenerator<GenerateReplyStreamProgress> {
+	yield {
+		status: "starting",
+		message: "AI 답변 생성을 시작합니다...",
+	};
+
+	// 1. 원본 메일 조회
+	yield { status: "fetching_mail", message: "원본 메일을 조회합니다..." };
+	const message = findGmailMessageById(mailId);
+	if (!message) {
+		throw new Error(`메일을 찾을 수 없습니다 (ID: ${mailId})`);
+	}
+
+	// 2. 첨부파일 조회
+	yield { status: "fetching_attachments", message: "첨부파일을 확인합니다..." };
+	const attachments = findAttachmentsByMessageId(message.message_id);
+	const inputFilePaths = attachments.map((attachment) =>
+		path.join(
+			process.cwd(),
+			FILE_PATH,
+			`${message.message_id}/${attachment.file_name}`,
+		),
+	);
+	yield {
+		status: "starting_agent",
+		message: "AI 에이전트를 실행하여 답변 초안을 생성합니다...",
+	};
+
+	// 3. AI 에이전트 스트림 실행
+	const routerInput = `${message.subject || ""}\n\n${message.body || message.snippet || ""}`;
+	const agentStream = await streamRouterAgent(routerInput, inputFilePaths);
+
+	let mailTitle = "";
+	let mailBody = "";
+	let mailAttachments: string[] = [];
+
+	for await (const chunk of agentStream) {
+		const nodeName = Object.keys(chunk)[0];
+		const nodeOutput = Object.values(chunk)[0] as any;
+
+		let statusMessage = `에이전트 [${nodeName}] 실행 중...`;
+
+		if (nodeOutput?.messages) {
+			const lastMessage = nodeOutput.messages.at(-1);
+			if (lastMessage?.content) {
+				statusMessage = lastMessage.content;
+			}
+		} else if (nodeName === "create_mail") {
+			mailTitle = nodeOutput.mail_title;
+			mailBody = nodeOutput.mail_body;
+			mailAttachments = nodeOutput.attachments ?? [];
+			statusMessage = "메일 초안이 생성되었습니다.";
+		}
+
+		yield { status: "agent_running", message: statusMessage, data: chunk };
+	}
+
+	// 4. DB에 답변 저장
+	yield { status: "saving_reply", message: "답변을 데이터베이스에 저장합니다..." };
+	if (message.id) {
+		createReplyMail({
+			original_message_id: message.message_id,
+			subject: mailTitle || `Re: ${message.subject || "No Subject"}`,
+			reply_body: mailBody,
+			attachments: JSON.stringify(mailAttachments),
+			is_sent: false,
+		});
+	}
+
+	// 5. 원본 메일 읽음 처리
+	yield { status: "marking_as_read", message: "원본 메일을 읽음으로 처리합니다..." };
+	try {
+		const creds = await getCredentials();
+		const service = buildGmailService(creds);
+		const gmailClient = new GmailClient(service);
+		await gmailClient.markEmailAsRead(message.message_id);
+	} catch (error) {
+		yield {
+			status: "warning",
+			message: `메일을 읽음으로 처리하는 데 실패했습니다: ${error.message}`,
+		};
+	}
+
+	yield { status: "complete", message: "모든 작업이 완료되었습니다." };
+}
+
 export interface GenerateRepliesProgress {
+
 	totalEmails: number;
 	processedEmails: number;
 	successCount: number;

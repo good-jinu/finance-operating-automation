@@ -1,0 +1,42 @@
+FROM ./Midm-2.0-Base-Instruct-q4_k_m.gguf
+
+TEMPLATE """<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+{{- if .System }}
+{{ .System }}
+{{- end }}
+{{- if .Tools }}
+Mi:dm은 사용자의 요청을 처리하기 위해 제공된 도구(함수)를 호출할 수 있다.
+Mi:dm은 도구 사용시 아래 규칙을 준수해야 한다.
+- 제공된 도구만 사용하고, 모든 필수 인자를 반드시 포함한다.
+- 주어진 tool_name을 임의로 변경하지 않아야 한다.
+- 도구를 호출하는 경우, 마지막은 도구 호출로 끝내며 그 뒤에 텍스트를 출력하지 않는다.
+- 도구 호출 결과를 활용하여 응답을 생성한다.
+- 도구가 필요하지 않은 경우에는 일반적인 방식으로 응답한다.
+- 도구 호출 정보는 다음과 같이 <tool_call></tool_call> XML 태그 사이에 작성한다.
+<tool_call>\n{"name": "tool_name", "arguments": {"param": "value"}}\n</tool_call>
+
+tool_list: {{ json .Tools }}
+{{- end }}<|eot_id|>
+{{- range .Messages }}
+<|start_header_id|>{{ .Role }}<|end_header_id|>
+{{- if .Content }} {{ .Content }}
+{{- else if .ToolCalls }}
+{{- range .ToolCalls }}
+<tool_call>
+{"name": "{{ .Function.Name }}", "arguments": {{ json .Function.Arguments }}}
+</tool_call>
+{{- end }}
+{{- end }}
+<|eot_id|>
+{{- end }}
+<|start_header_id|>assistant<|end_header_id|>
+"""
+
+PARAMETER temperature 0.8
+PARAMETER num_predict 4096
+PARAMETER num_ctx 32768
+PARAMETER stop <|eot_id|>
+PARAMETER num_ctx 32768
+PARAMETER repeat_penalty 1.05
+PARAMETER top_k 20
+PARAMETER top_p 0.7
