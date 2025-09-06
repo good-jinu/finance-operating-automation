@@ -80,14 +80,14 @@ describe("databaseService", () => {
 	});
 
 	describe("getTableNames", () => {
-		it("should return a list of table names", () => {
+		it("should return a list of table names with labels", () => {
 			const result = getTableNames();
 			expect(result).toEqual([
-				"customers_company",
-				"customers",
-				"authorized_person",
-				"payment_account",
-				"official_seal",
+				{ name: "customers_company", label: "고객사" },
+				{ name: "customers", label: "고객" },
+				{ name: "authorized_person", label: "승인된 직원" },
+				{ name: "payment_account", label: "결제 계좌" },
+				{ name: "official_seal", label: "직인" },
 			]);
 		});
 	});
