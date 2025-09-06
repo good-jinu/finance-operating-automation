@@ -9,7 +9,9 @@ import { Toaster } from "@/components/ui/sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function DatabaseTab() {
-	const [tableNames, setTableNames] = useState<string[]>([]);
+	const [tableNames, setTableNames] = useState<{ name: string; label: string }[]>(
+		[],
+	);
 	const [activeTable, setActiveTable] = useState<string>("");
 	const [tableData, setTableData] = useState<any[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
@@ -36,10 +38,10 @@ export default function DatabaseTab() {
 		async function fetchTableNames() {
 			try {
 				const res = await fetch("/api/database/tables");
-				const names = await res.json();
-				setTableNames(names);
-				if (names.length > 0) {
-					setActiveTable(names[0]);
+				const tables = await res.json();
+				setTableNames(tables);
+				if (tables.length > 0) {
+					setActiveTable(tables[0].name);
 				}
 			} catch (error) {
 				console.error("Failed to fetch table names:", error);
@@ -122,14 +124,14 @@ export default function DatabaseTab() {
 				className="space-y-4"
 			>
 				<TabsList>
-					{tableNames.map((name) => (
-						<TabsTrigger key={name} value={name}>
-							{name}
+					{tableNames.map((table) => (
+						<TabsTrigger key={table.name} value={table.name}>
+							{table.label}
 						</TabsTrigger>
 					))}
 				</TabsList>
-				{tableNames.map((name) => (
-					<TabsContent key={name} value={name}>
+				{tableNames.map((table) => (
+					<TabsContent key={table.name} value={table.name}>
 						<div className="flex justify-end mb-4">
 							<Button onClick={() => handleOpenForm(null)}>Add New</Button>
 						</div>

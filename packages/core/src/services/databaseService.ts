@@ -47,13 +47,13 @@ export async function getTableData(tableName: string): Promise<unknown[]> {
 	}
 }
 
-export function getTableNames(): string[] {
+export function getTableNames(): { name: string; label: string }[] {
 	return [
-		"customers_company",
-		"customers",
-		"authorized_person",
-		"payment_account",
-		"official_seal",
+		{ name: "customers_company", label: "고객사" },
+		{ name: "customers", label: "고객" },
+		{ name: "authorized_person", label: "승인된 직원" },
+		{ name: "payment_account", label: "결제 계좌" },
+		{ name: "official_seal", label: "직인" },
 	];
 }
 
