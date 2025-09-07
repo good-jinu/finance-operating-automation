@@ -75,10 +75,9 @@ describe("databaseService", () => {
 			const result = getTableNames();
 			expect(result).toEqual([
 				{ name: "customers_company", label: "고객사" },
-				{ name: "customers", label: "고객" },
-				{ name: "authorized_person", label: "승인된 직원" },
+			{ name: "authorized_person", label: "수권자" },
 				{ name: "payment_account", label: "결제 계좌" },
-				{ name: "official_seal", label: "직인" },
+			{ name: "official_seal", label: "서명 인감" },
 			]);
 		});
 	});

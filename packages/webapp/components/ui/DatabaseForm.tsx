@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useDatabaseTableSchema } from "@/hooks/useDatabase";
 import { Button } from "./button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from "./dialog";
 import { Input } from "./input";
@@ -22,43 +23,23 @@ export function DatabaseForm({
 	tableName,
 }: DatabaseFormProps) {
 	const [formData, setFormData] = useState<any>({});
-	const [formSchema, setFormSchema] = useState<any[]>([]);
-
-	const fetchSchema = useCallback(async () => {
-		if (!tableName) return;
-		try {
-			const res = await fetch(`/api/database/${tableName}/schema`);
-			const schema = await res.json();
-			const filteredSchema = schema.filter(
-				(col: any) =>
-					col.name !== "id" &&
-					col.name !== "created_at" &&
-					col.name !== "updated_at",
-			);
-			setFormSchema(filteredSchema);
-
-			// Initialize form data for new entries
-			if (!initialData) {
-				const initialFormData = filteredSchema.reduce((acc: any, col: any) => {
-					acc[col.name] = "";
-					return acc;
-				}, {});
-				setFormData(initialFormData);
-			}
-		} catch (error) {
-			console.error("Failed to fetch table schema:", error);
-		}
-	}, [tableName, initialData]);
+	const {
+		data: formSchema,
+		error,
+		isLoading,
+	} = useDatabaseTableSchema(tableName);
 
 	useEffect(() => {
-		if (isOpen) {
-			if (initialData) {
-				setFormData(initialData);
-			} else {
-				fetchSchema();
-			}
+		if (initialData) {
+			setFormData(initialData);
+		} else if (formSchema) {
+			const initialFormData = formSchema.reduce((acc: any, col: any) => {
+				acc[col.name] = "";
+				return acc;
+			}, {});
+			setFormData(initialFormData);
 		}
-	}, [initialData, isOpen, fetchSchema]);
+	}, [initialData, formSchema]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -71,11 +52,14 @@ export function DatabaseForm({
 	};
 
 	const renderFormFields = () => {
+		if (isLoading) return <p>Loading form...</p>;
+		if (error) return <p>Error loading form.</p>;
+
 		const fields = initialData
 			? Object.keys(initialData).filter(
 					(key) => key !== "id" && key !== "created_at" && key !== "updated_at",
 				)
-			: formSchema.map((col) => col.name);
+			: formSchema?.map((col: any) => col.name) || [];
 
 		return fields.map((key: string) => (
 			<div key={key} className="grid grid-cols-4 items-center gap-4">
@@ -94,7 +78,7 @@ export function DatabaseForm({
 	};
 
 	return (
-		<Dialog open={isOpen}>
+		<Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
 			<DialogContent>
 				<DialogHeader>
 					{initialData ? "Edit" : "Create"} {tableName}

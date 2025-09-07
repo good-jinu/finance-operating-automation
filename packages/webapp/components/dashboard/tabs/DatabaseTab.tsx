@@ -1,7 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import {
+	useCreateDatabaseRow,
+	useDatabaseTableData,
+	useDatabaseTables,
+	useDeleteDatabaseRow,
+	useUpdateDatabaseRow,
+} from "@/hooks/useDatabase";
 import { Button } from "@/components/ui/button";
 import { DatabaseForm } from "@/components/ui/DatabaseForm";
 import { DataTable } from "@/components/ui/DataTable";
@@ -9,51 +16,34 @@ import { Toaster } from "@/components/ui/sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function DatabaseTab() {
-	const [tableNames, setTableNames] = useState<
-		{ name: string; label: string }[]
-	>([]);
 	const [activeTable, setActiveTable] = useState<string>("");
-	const [tableData, setTableData] = useState<any[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
 	const [isFormOpen, setIsFormOpen] = useState(false);
 	const [editingRow, setEditingRow] = useState<any | null>(null);
 
-	const fetchTableData = useCallback(async () => {
-		if (!activeTable) return;
-		setIsLoading(true);
-		try {
-			const res = await fetch(`/api/database/${activeTable}`);
-			const data = await res.json();
-			setTableData(data);
-		} catch (error) {
-			console.error(`Failed to fetch data for table ${activeTable}:`, error);
-			setTableData([]);
-			toast.error("Failed to fetch data.");
-		} finally {
-			setIsLoading(false);
-		}
-	}, [activeTable]);
+	const {
+		data: tableNames,
+		error: tablesError,
+		isLoading: isLoadingTables,
+	} = useDatabaseTables();
+
+	const {
+		data: tableData,
+		error: tableDataError,
+		isLoading: isLoadingTableData,
+	} = useDatabaseTableData(activeTable);
 
 	useEffect(() => {
-		async function fetchTableNames() {
-			try {
-				const res = await fetch("/api/database/tables");
-				const tables = await res.json();
-				setTableNames(tables);
-				if (tables.length > 0) {
-					setActiveTable(tables[0].name);
-				}
-			} catch (error) {
-				console.error("Failed to fetch table names:", error);
-				toast.error("Failed to fetch table names.");
-			}
+		if (tableNames && tableNames.length > 0 && !activeTable) {
+			setActiveTable(tableNames[0].name);
 		}
-		fetchTableNames();
-	}, []);
+	}, [tableNames, activeTable]);
 
-	useEffect(() => {
-		fetchTableData();
-	}, [fetchTableData]);
+	const createRowMutation = useCreateDatabaseRow(activeTable);
+	const updateRowMutation = useUpdateDatabaseRow(
+		activeTable,
+		editingRow?.id || "",
+	);
+	const deleteRowMutation = useDeleteDatabaseRow(activeTable);
 
 	const handleOpenForm = (row: any | null) => {
 		setEditingRow(row);
@@ -66,30 +56,14 @@ export default function DatabaseTab() {
 	};
 
 	const handleSubmitForm = async (data: any) => {
+		const mutation = editingRow ? updateRowMutation : createRowMutation;
 		try {
-			const url = editingRow
-				? `/api/database/${activeTable}/${editingRow.id}`
-				: `/api/database/${activeTable}`;
-			const method = editingRow ? "PUT" : "POST";
-
-			const response = await fetch(url, {
-				method,
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(data),
-			});
-
-			if (!response.ok) {
-				const errorData = await response.text();
-				throw new Error(errorData || "Failed to save data");
-			}
-
+			await mutation.mutateAsync(data);
 			toast.success(
 				`Successfully ${editingRow ? "updated" : "created"} record.`,
 			);
 			handleCloseForm();
-			fetchTableData(); // Refresh data
 		} catch (error: any) {
-			console.error("Error saving data:", error);
 			toast.error(`Error saving data: ${error.message}`);
 		}
 	};
@@ -97,23 +71,16 @@ export default function DatabaseTab() {
 	const handleDeleteRow = async (row: any) => {
 		if (window.confirm("Are you sure you want to delete this record?")) {
 			try {
-				const response = await fetch(`/api/database/${activeTable}/${row.id}`, {
-					method: "DELETE",
-				});
-
-				if (!response.ok) {
-					const errorData = await response.text();
-					throw new Error(errorData || "Failed to delete data");
-				}
-
+				await deleteRowMutation.mutateAsync(row.id);
 				toast.success("Successfully deleted record.");
-				fetchTableData(); // Refresh data
 			} catch (error: any) {
-				console.error("Error deleting data:", error);
 				toast.error(`Error deleting data: ${error.message}`);
 			}
 		}
 	};
+
+	if (isLoadingTables) return <p>Loading tables...</p>;
+	if (tablesError) return <p>Error loading tables: {tablesError.message}</p>;
 
 	return (
 		<>
@@ -124,19 +91,21 @@ export default function DatabaseTab() {
 				className="space-y-4"
 			>
 				<TabsList>
-					{tableNames.map((table) => (
+					{tableNames?.map((table: { name: string; label: string }) => (
 						<TabsTrigger key={table.name} value={table.name}>
 							{table.label}
 						</TabsTrigger>
 					))}
 				</TabsList>
-				{tableNames.map((table) => (
+				{tableNames?.map((table: { name: string; label: string }) => (
 					<TabsContent key={table.name} value={table.name}>
 						<div className="flex justify-end mb-4">
 							<Button onClick={() => handleOpenForm(null)}>Add New</Button>
 						</div>
-						{isLoading ? (
+						{isLoadingTableData ? (
 							<p>Loading...</p>
+						) : tableDataError ? (
+							<p>Error: {tableDataError.message}</p>
 						) : (
 							<DataTable
 								data={tableData}
