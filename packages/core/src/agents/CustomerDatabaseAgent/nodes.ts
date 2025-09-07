@@ -110,7 +110,7 @@ export const analyzeAuthorizedPersonRequest = async (
 - email: 이메일 주소 (유효한 이메일 형식)
 - phone_number: 전화번호 (하이픈 포함 가능)
 
-예시) {{ "name": "이전 인물 이름", "update_data": { "name": "새로운 이름", "email": "some@gmail.com", "phone_number": "123-456-7890" } }}
+예시) {{ "name": "변경 전 수권자 이름", "update_data": { "name": "변경 후 수권자 이름", "email": "some@gmail.com", "phone_number": "123-456-7890" } }}
 
 반드시 예시의 형식을 지키십시오.
 `;

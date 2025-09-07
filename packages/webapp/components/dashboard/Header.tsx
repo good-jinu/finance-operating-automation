@@ -16,7 +16,7 @@ export default function Header() {
 							<Bot className="w-5 h-5 text-primary-foreground" />
 						</div>
 						<h1 className="text-2xl font-bold text-foreground">
-							Client Operation Agent
+							금융 고객 서류 처리 자동화
 						</h1>
 					</div>
 					<nav className="flex items-stretch gap-2 h-16 pt-2">

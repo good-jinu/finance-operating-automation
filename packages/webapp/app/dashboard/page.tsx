@@ -29,15 +29,13 @@ const weeklyData = [
 	{ date: "수", requests: 38, avgProcessTime: 15 },
 	{ date: "목", requests: 61, avgProcessTime: 8 },
 	{ date: "금", requests: 49, avgProcessTime: 11 },
-	{ date: "토", requests: 23, avgProcessTime: 14 },
-	{ date: "일", requests: 18, avgProcessTime: 16 },
 ];
 
 const requestTypes = [
 	{ name: "일반 문의", value: 35, color: "#6366f1" },
-	{ name: "기술 지원", value: 25, color: "#8b5cf6" },
-	{ name: "계정 관련", value: 20, color: "#06b6d4" },
-	{ name: "결제 문의", value: 15, color: "#10b981" },
+	{ name: "수권자 교체", value: 25, color: "#8b5cf6" },
+	{ name: "계좌 교체", value: 20, color: "#06b6d4" },
+	{ name: "서명인감 교체", value: 15, color: "#10b981" },
 	{ name: "기타", value: 5, color: "#f59e0b" },
 ];
 
@@ -130,14 +128,14 @@ export default function Dashboard() {
 							<div className="text-2xl font-bold text-accent">
 								{dailyAvgEfficiency}배
 							</div>
-							<p className="text-xs text-muted-foreground">인간 대비 일평균</p>
+							<p className="text-xs text-muted-foreground">수작업 대비 일평균</p>
 						</CardContent>
 					</Card>
 
 					<Card>
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 							<CardTitle className="text-sm font-medium">
-								인력 절감 효과
+								수작업 절감 효과
 							</CardTitle>
 							<Users className="h-4 w-4 text-muted-foreground" />
 						</CardHeader>
@@ -231,12 +229,12 @@ export default function Dashboard() {
 					</Card>
 				</div>
 
-				{/* 누적 인력 절감 효과 */}
+				{/* 누적 수작업 절감 효과 */}
 				<Card>
 					<CardHeader>
-						<CardTitle>누적 인력 절감 효과</CardTitle>
+						<CardTitle>누적 수작업 절감 효과</CardTitle>
 						<CardDescription>
-							에이전트 vs 인간 처리량 누적 비교 (인간: 시간당{" "}
+							에이전트 vs 수작업 처리량 누적 비교 (수작업: 시간당{" "}
 							{HUMAN_HOURLY_CAPACITY}건, 에이전트: 시간당{" "}
 							{AGENT_HOURLY_CAPACITY}건 = {EFFICIENCY_MULTIPLIER}배 효율)
 						</CardDescription>
@@ -255,7 +253,7 @@ export default function Dashboard() {
 										color: "#374151",
 									}}
 									formatter={(value, name) => {
-										if (name === "인간 상당 처리량")
+										if (name === "수작업 상당 처리량")
 											return [`${value}건`, name];
 										if (name === "에이전트 추가 처리량")
 											return [`+${value}건`, name];
@@ -267,7 +265,7 @@ export default function Dashboard() {
 									dataKey="cumulativeHumanEquivalent"
 									stackId="a"
 									fill="#94a3b8"
-									name="인간 상당 처리량"
+									name="수작업 상당 처리량"
 								/>
 								<Bar
 									dataKey="cumulativeAdditionalCapacity"

@@ -13,3 +13,6 @@ token.json
 
 # test coverage
 coverage/
+
+# meta files
+.DS_Store

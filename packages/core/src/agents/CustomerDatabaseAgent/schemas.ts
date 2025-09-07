@@ -34,10 +34,10 @@ export const RouteDecisionSchema = z.object({
 // 수권자 분석을 위한 스키마
 export const AuthorizedPersonAnalysisSchema = z
 	.object({
-		name: z.string().describe("이전 수권자의 이름"),
+		name: z.string().describe("변경 전 수권자 이름"),
 		update_data: z
 			.object({
-				name: z.string().optional().describe("새로운 수권자 이름"),
+				name: z.string().optional().describe("변경 후 수권자 이름"),
 				email: z.email().optional().describe("새로운 이메일 주소"),
 				phone_number: z
 					.string()
