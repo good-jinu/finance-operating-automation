@@ -15,7 +15,7 @@ The system follows a **multi-agent architecture** using LangChain's LangGraph:
 1. **RouterAgent**: Main orchestrator that routes requests to appropriate sub-agents
 2. **ChatAgent**: Interactive conversational agent using createReactAgent with custom tools and streaming capabilities
 3. **GuideProviderAgent**: Provides procedural guides for common tasks
-4. **FileReaderAgent**: Reads and processes document files 
+4. **FileReaderAgent**: Reads and processes document files
 5. **CustomerDatabaseAgent**: Updates customer database with processed information
 
 The agents use a **ReAct pattern** (Reasoning + Acting) for intelligent decision making and maintain conversation context through memory management.
@@ -39,7 +39,10 @@ pnpm install
 ```bash
 # Run development server (Next.js + Socket.IO)
 pnpm dev
+```
+> **Note:** This command starts a custom `server.ts` using `tsx`, which handles Socket.IO connections and manages the Next.js app in development mode.
 
+```bash
 # Build the webapp
 pnpm build
 
@@ -61,7 +64,20 @@ biome check <file-path>
 
 The project uses **Biome 2.2.2** for fast linting and formatting instead of ESLint/Prettier.
 
+### Running the Test Suite
+The project uses **Vitest** as its primary testing framework. To run all tests for all packages, use the following command:
+
+```bash
+# Run all tests
+pnpm test
+
+# Run tests with coverage report
+pnpm coverage
+```
+This command will execute the `vitest run` script in both `packages/core` and `packages/webapp`.
+
 ### Testing Individual Components
+For more granular testing of specific components, you can use `tsx` to run individual test files:
 ```bash
 # Test specific agent (use tsx for TypeScript execution)
 npx tsx packages/core/src/agents/RouterAgent/RouterAgent.ts
@@ -95,7 +111,7 @@ npx tsx packages/core/src/services/databaseService.ts
 - Session-based chat history persistence
 
 ### File Processing
-- Supports Word documents via `mammoth` library
+- Supports Word documents via `mammoth` library and PDF documents via `pdf-parse`.
 - File attachments stored in `.storage/files`
 - Database references to processed files for customer records
 
@@ -144,12 +160,12 @@ The ChatAgent uses a different pattern based on **createReactAgent**:
 
 #### Usage Pattern
 ```typescript
-import { 
-  invokeChatAgent, 
-  continueChatAgent, 
-  streamChatAgent, 
+import {
+  invokeChatAgent,
+  continueChatAgent,
+  streamChatAgent,
   streamContinueChatAgent,
-  resetChatAgent 
+  resetChatAgent
 } from './agents/ChatAgent/ChatAgent';
 
 // Single request
@@ -157,7 +173,7 @@ const response = await invokeChatAgent("ABC회사의 수권자 목록을 보여�
 
 // Continuous conversation with context
 const followUp = await continueChatAgent(
-  "김수권 수권자의 전화번호를 변경해주세요.", 
+  "김수권 수권자의 전화번호를 변경해주세요.",
   "session-id"
 );
 
@@ -182,8 +198,8 @@ await resetChatAgent("session-id");
 - Both directories auto-created on first run
 
 ### Environment Requirements
-- Node.js >= 22.18.0
-- pnpm >= 10.15.1
+- Node.js: `>=22.18.0`
+- pnpm: `10.15.1` (as specified in `packageManager`)
 - Ollama server running locally with `midm-2.0-base` model
 
 ## Development Patterns
@@ -209,7 +225,7 @@ await resetChatAgent("session-id");
 
 This system automates three main customer service processes:
 1. **Authority Change Guidance** (`authority_change`): Corporate authorized person changes
-2. **Payment Account Change Guidance** (`payment_account_change`): Direct debit account modifications  
+2. **Payment Account Change Guidance** (`payment_account_change`): Direct debit account modifications
 3. **Seal/Signature Change Guidance** (`seal_sign_change`): Corporate seal and signature updates
 
 The AI agents understand Korean financial terminology and provide appropriate responses in Korean language.
